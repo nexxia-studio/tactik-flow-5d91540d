@@ -256,7 +256,14 @@ export function SquadList({
                   : mode === "substitute"
                     ? () => onToggleSubstitute(player.id)
                     : mode === "non-selected"
-                      ? () => onToggleSubstitute(player.id)
+                      ? () => {
+                          const pitchFull = assignedIds.every((id) => id !== null);
+                          if (!pitchFull) {
+                            onAddPlayer(player.id);
+                          } else {
+                            onToggleSubstitute(player.id);
+                          }
+                        }
                       : () => {}
               }
               onChangeStatus={(status) => onChangeStatus(player.id, status)}
