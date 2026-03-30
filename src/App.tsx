@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { useOnboarding } from "@/hooks/useOnboarding";
 import { AppLayout } from "@/components/AppLayout";
 import Dashboard from "@/pages/Dashboard";
+import Players from "@/pages/Players";
 import Auth from "@/pages/Auth";
 import OnboardingClub from "@/pages/onboarding/OnboardingClub";
 import OnboardingPlan from "@/pages/onboarding/OnboardingPlan";
