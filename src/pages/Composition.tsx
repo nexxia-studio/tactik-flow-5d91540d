@@ -1,8 +1,10 @@
 import { useState, useCallback, useMemo } from "react";
 import { FORMATIONS, FORMATION_KEYS } from "@/components/composition/formations";
-import { MOCK_PLAYERS, type FUTPlayer, getPositionCategory } from "@/components/composition/mockPlayers";
+import { MOCK_PLAYERS, type FUTPlayer, type PlayerStatus, getPositionCategory } from "@/components/composition/mockPlayers";
 import { PitchView } from "@/components/composition/PitchView";
 import { SquadList } from "@/components/composition/SquadList";
+
+const MAX_SUBSTITUTES = 4;
 
 /**
  * Given a formation, returns the filling order for slots:
@@ -40,7 +42,20 @@ export default function Composition() {
     return available.slice(11, 16).map((p) => p.id);
   });
 
-  const playerMap = useMemo(() => new Map(MOCK_PLAYERS.map((p) => [p.id, p])), []);
+  // Player status overrides
+  const [playerStatuses, setPlayerStatuses] = useState<Record<string, PlayerStatus>>(() => {
+    const map: Record<string, PlayerStatus> = {};
+    MOCK_PLAYERS.forEach((p) => { map[p.id] = p.status; });
+    return map;
+  });
+
+  // Compute players with overridden statuses
+  const playersWithStatus = useMemo(
+    () => MOCK_PLAYERS.map((p) => ({ ...p, status: playerStatuses[p.id] ?? p.status })),
+    [playerStatuses]
+  );
+
+  const playerMap = useMemo(() => new Map(playersWithStatus.map((p) => [p.id, p])), [playersWithStatus]);
 
   const assignedPlayers: (FUTPlayer | null)[] = formation.positions.map(
     (_, i) => (assignedIds[i] ? playerMap.get(assignedIds[i]!) ?? null : null)
@@ -89,6 +104,32 @@ export default function Composition() {
     },
     [playerMap, formation, fillingOrder]
   );
+
+  // Toggle substitute (bench) status
+  const toggleSubstitute = useCallback((playerId: string) => {
+    setSubstituteIds((prev) => {
+      if (prev.includes(playerId)) {
+        return prev.filter((id) => id !== playerId);
+      }
+      if (prev.length >= MAX_SUBSTITUTES) return prev;
+      return [...prev, playerId];
+    });
+  }, []);
+
+  // Change player status
+  const changePlayerStatus = useCallback((playerId: string, status: PlayerStatus) => {
+    setPlayerStatuses((prev) => ({ ...prev, [playerId]: status }));
+    if (status !== "available") {
+      setAssignedIds((prev) => {
+        const idx = prev.indexOf(playerId);
+        if (idx === -1) return prev;
+        const next = [...prev];
+        next[idx] = null;
+        return next;
+      });
+      setSubstituteIds((prev) => prev.filter((id) => id !== playerId));
+    }
+  }, []);
 
   // Remove a player from the pitch
   const removePlayer = useCallback((playerId: string) => {
@@ -181,11 +222,14 @@ export default function Composition() {
         {/* Sidebar — squad list */}
         <div>
           <SquadList
-            allPlayers={MOCK_PLAYERS}
+            allPlayers={playersWithStatus}
             assignedIds={assignedIds}
             substituteIds={substituteIds}
             onAddPlayer={addPlayer}
             onRemovePlayer={removePlayer}
+            onToggleSubstitute={toggleSubstitute}
+            onChangeStatus={changePlayerStatus}
+            maxSubstitutes={MAX_SUBSTITUTES}
             positionLabels={formation.positions.map((p) => p.label)}
           />
         </div>
