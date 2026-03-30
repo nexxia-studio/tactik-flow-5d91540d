@@ -96,6 +96,26 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/calendrier"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <CalendarPage />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/classement"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <Standings />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
