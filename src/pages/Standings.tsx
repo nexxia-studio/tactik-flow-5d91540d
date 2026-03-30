@@ -112,7 +112,7 @@ export default function Standings() {
                     }`}
                   >
                     <td className="px-4 py-3 text-center">
-                      <span className={`font-display text-[13px] ${isUs ? "text-primary" : team.rank === 1 ? "text-[var(--color-success)]" : team.rank >= 2 && team.rank <= 5 ? "text-[var(--color-info)]" : team.rank >= 14 ? "text-[var(--color-danger)]" : "text-t-muted"}`}>
+                      <span className={`font-display text-[13px] ${team.rank === 1 ? "text-[var(--color-success)]" : team.rank >= 2 && team.rank <= 5 ? "text-[var(--color-info)]" : team.rank >= 14 ? "text-[var(--color-danger)]" : "text-t-muted"}`}>
                         {team.rank}
                       </span>
                     </td>
