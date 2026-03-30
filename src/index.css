@@ -2,104 +2,196 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* ──────────────────────────────────────
+   FONTS
+   ────────────────────────────────────── */
 
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
-    --radius: 0.5rem;
-
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
+@font-face {
+  font-family: 'Chaney';
+  src: url('/fonts/ChaneyUltraExtended.woff2') format('woff2'),
+       url('/fonts/ChaneyUltraExtended.woff') format('woff');
+  font-weight: 900;
+  font-display: swap;
 }
+
+@font-face {
+  font-family: 'N27';
+  src: url('/fonts/N27-Regular.woff2') format('woff2'),
+       url('/fonts/N27-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ──────────────────────────────────────
+   DESIGN SYSTEM — CSS VARIABLES
+   ────────────────────────────────────── */
+
+:root {
+  /* Typography scale */
+  --font-display: 'Chaney', 'Arial Black', sans-serif;
+  --font-ui: 'N27', 'DM Sans', sans-serif;
+  --text-hero: clamp(40px, 6vw, 72px);
+  --text-h1: clamp(28px, 4vw, 40px);
+  --text-h2: clamp(18px, 2.5vw, 24px);
+  --text-h3: 16px;
+  --text-body: 14px;
+  --text-small: 13px;
+  --text-label: 11px;
+  --text-micro: 10px;
+
+  /* Accent primary — replaceable per club theme */
+  --color-primary: #16FF6E;
+  --color-primary-dim: rgba(22, 255, 110, 0.12);
+  --color-primary-glow: rgba(22, 255, 110, 0.20);
+  --color-primary-border: rgba(22, 255, 110, 0.18);
+  --color-primary-text: #000000;
+
+  /* Backgrounds — Dark mode default */
+  --bg-base: #0A0D0F;
+  --bg-surface-1: #111518;
+  --bg-surface-2: #181E22;
+  --bg-surface-3: #1D2429;
+
+  /* Text */
+  --text-primary: #EEF2EF;
+  --text-secondary: #667A70;
+  --text-muted: #2D3D35;
+  --text-disabled: #1F2E28;
+
+  /* Borders */
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-default: rgba(255, 255, 255, 0.10);
+  --border-strong: rgba(255, 255, 255, 0.16);
+
+  /* Semantic — fixed, never overridden by theme */
+  --color-success: #16FF6E;
+  --color-warning: #FFD60A;
+  --color-danger: #FF3B30;
+  --color-info: #4F8EFF;
+
+  /* Chemistry FUT */
+  --chem-optimal: #16FF6E;
+  --chem-good: #FFD60A;
+  --chem-weak: #FF8C00;
+  --chem-bad: #FF3B30;
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+}
+
+[data-theme="light"] {
+  --bg-base: #F4F6F4;
+  --bg-surface-1: #FFFFFF;
+  --bg-surface-2: #F0F2F0;
+  --bg-surface-3: #E8EDE9;
+  --text-primary: #0D1410;
+  --text-secondary: #4A6055;
+  --text-muted: #8BA898;
+  --text-disabled: #C4D4CE;
+  --border-subtle: rgba(0, 0, 0, 0.06);
+  --border-default: rgba(0, 0, 0, 0.10);
+  --border-strong: rgba(0, 0, 0, 0.16);
+  --color-primary: #0FCC58;
+  --color-primary-dim: rgba(15, 204, 88, 0.10);
+  --color-primary-glow: rgba(15, 204, 88, 0.16);
+  --color-primary-border: rgba(15, 204, 88, 0.20);
+  --color-primary-text: #FFFFFF;
+}
+
+/* ──────────────────────────────────────
+   BASE STYLES
+   ────────────────────────────────────── */
 
 @layer base {
   * {
-    @apply border-border;
+    border-color: var(--border-subtle);
   }
 
   body {
-    @apply bg-background text-foreground;
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    font-family: var(--font-ui);
+    font-size: var(--text-body);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
+}
+
+/* ──────────────────────────────────────
+   UTILITY CLASSES
+   ────────────────────────────────────── */
+
+@layer utilities {
+  .glow-primary {
+    box-shadow: 0 0 12px var(--color-primary-glow),
+                0 0 24px var(--color-primary-dim);
+  }
+
+  .glow-text-primary {
+    text-shadow: 0 0 20px var(--color-primary-glow);
+  }
+
+  .bg-gradient-hero {
+    background:
+      radial-gradient(ellipse 60% 50% at 15% 40%, rgba(22,255,110,0.06) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 60% at 80% 60%, rgba(22,100,255,0.04) 0%, transparent 70%),
+      var(--bg-base);
+  }
+
+  .font-display {
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .font-ui {
+    font-family: var(--font-ui);
+  }
+
+  .text-label {
+    font-family: var(--font-ui);
+    font-size: var(--text-label);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+}
+
+/* ──────────────────────────────────────
+   TRANSITIONS
+   ────────────────────────────────────── */
+
+* {
+  transition-property: color, background-color, border-color, opacity, transform;
+  transition-duration: 150ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-default);
+  border-radius: var(--radius-full);
 }
