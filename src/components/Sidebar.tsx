@@ -11,8 +11,11 @@ import {
   Settings,
   Moon,
   Sun,
+  LogOut,
+  User,
 } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
+import { useAuth } from "@/contexts/AuthContext";
 import logoDark from "@/assets/tactik-symbol-dark.svg";
 import logoLight from "@/assets/tactik-symbol-light.svg";
 
