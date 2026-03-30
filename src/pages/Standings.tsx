@@ -112,7 +112,7 @@ export default function Standings() {
                     }`}
                   >
                     <td className="px-4 py-3 text-center">
-                      <span className={`font-display text-[13px] ${isUs ? "text-primary" : team.rank <= 2 ? "text-[var(--color-success)]" : team.rank >= 14 ? "text-[var(--color-danger)]" : "text-t-muted"}`}>
+                      <span className={`font-display text-[13px] ${isUs ? "text-primary" : team.rank === 1 ? "text-[var(--color-success)]" : team.rank >= 2 && team.rank <= 5 ? "text-[var(--color-info)]" : team.rank >= 14 ? "text-[var(--color-danger)]" : "text-t-muted"}`}>
                         {team.rank}
                       </span>
                     </td>
@@ -158,6 +158,9 @@ export default function Standings() {
       <div className="flex flex-wrap gap-4 font-ui text-[11px] text-t-muted">
         <span className="flex items-center gap-1.5">
           <div className="w-2 h-2 rounded-full bg-[var(--color-success)]" /> Promotion
+        </span>
+        <span className="flex items-center gap-1.5">
+          <div className="w-2 h-2 rounded-full bg-[var(--color-info)]" /> Tour Final
         </span>
         <span className="flex items-center gap-1.5">
           <div className="w-2 h-2 rounded-full bg-[var(--color-danger)]" /> Relégation
