@@ -11,13 +11,18 @@ const MAX_SUBSTITUTES = 4;
  * GK first, then DEF right-to-left (highest x first), then MID R→L, then ATT R→L.
  */
 function getSlotFillingOrder(formation: typeof FORMATIONS[string]): number[] {
-  const slots = formation.positions.map((pos, idx) => ({ idx, x: pos.x, y: pos.y }));
+  const slots = formation.positions.map((pos, idx) => ({
+    idx,
+    cat: getPositionCategory(pos.label),
+    x: pos.x,
+  }));
 
-  // Bottom to top (highest y first), then right to left (highest x first)
+  const catOrder = ["GK", "DEF", "MID", "ATT"];
+  // Category order (GK → DEF → MID → ATT), right-to-left within each category
   slots.sort((a, b) => {
-    const yDiff = b.y - a.y;
-    if (Math.abs(yDiff) > 3) return yDiff; // small y tolerance for same-row positions
-    return b.x - a.x;
+    const catDiff = catOrder.indexOf(a.cat) - catOrder.indexOf(b.cat);
+    if (catDiff !== 0) return catDiff;
+    return b.x - a.x; // right to left (higher x first)
   });
 
   return slots.map((s) => s.idx);
