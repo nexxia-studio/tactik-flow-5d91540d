@@ -22,6 +22,7 @@ import logoLight from "@/assets/tactik-symbol-light.svg";
 
 const mainNav = [
   { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
+  { label: "Équipe", path: "/equipe", icon: Shield },
   { label: "Composition FUT", path: "/composition", icon: Zap },
   { label: "Joueurs", path: "/joueurs", icon: Users },
   { label: "Statistiques", path: "/statistiques", icon: BarChart3 },
