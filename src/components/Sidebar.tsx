@@ -63,7 +63,11 @@ function NavItem({ label, path, icon: Icon, active }: NavItemProps) {
 export function Sidebar() {
   const location = useLocation();
   const { theme, toggle } = useTheme();
+  const { user, signOut } = useAuth();
   const currentPath = location.pathname;
+
+  const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Coach";
+  const avatarUrl = user?.user_metadata?.avatar_url;
 
   return (
     <aside className="hidden lg:flex fixed left-0 top-0 h-screen w-[220px] flex-col bg-bg-surface-1 border-r border-b-subtle z-40">
@@ -104,7 +108,7 @@ export function Sidebar() {
         ))}
       </nav>
 
-      {/* Footer: theme toggle + team card */}
+      {/* Footer */}
       <div className="px-3 pb-4 space-y-3">
         <button
           onClick={toggle}
@@ -114,13 +118,29 @@ export function Sidebar() {
           <span>{theme === "dark" ? "Mode clair" : "Mode sombre"}</span>
         </button>
 
-        <div className="bg-bg-surface-2 border border-b-subtle rounded-lg p-3">
-          <p className="font-display text-[11px] text-t-primary tracking-wider">
-            MON ÉQUIPE
-          </p>
-          <p className="text-[12px] text-t-secondary font-ui mt-1">
-            Saison 2025-2026
-          </p>
+        {/* User profile card */}
+        <div className="bg-bg-surface-2 border border-b-subtle rounded-lg p-3 space-y-3">
+          <div className="flex items-center gap-2.5">
+            {avatarUrl ? (
+              <img src={avatarUrl} alt={displayName} className="h-8 w-8 rounded-full object-cover" />
+            ) : (
+              <div className="h-8 w-8 rounded-full bg-primary-dim flex items-center justify-center">
+                <User className="h-4 w-4 text-primary" />
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <p className="font-ui text-[13px] text-t-primary truncate">{displayName}</p>
+              <p className="font-ui text-[11px] text-t-secondary truncate">{user?.email}</p>
+            </div>
+          </div>
+
+          <button
+            onClick={signOut}
+            className="flex items-center gap-2 w-full px-2 py-1.5 rounded-md text-[12px] font-ui text-t-secondary hover:bg-bg-surface-3 hover:text-danger transition-all cursor-pointer"
+          >
+            <LogOut className="h-3.5 w-3.5" />
+            <span>Se déconnecter</span>
+          </button>
         </div>
       </div>
     </aside>
