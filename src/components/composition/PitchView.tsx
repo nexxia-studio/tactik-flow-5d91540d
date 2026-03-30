@@ -9,6 +9,7 @@ interface Props {
   players: (FUTPlayer | null)[];
   onSwapSlots?: (fromSlot: number, toSlot: number) => void;
   onDropBenchPlayer?: (playerId: string, toSlot: number) => void;
+  onRemovePlayer?: (playerId: string) => void;
 }
 
 type ChemLevel = "optimal" | "good" | "weak" | "bad";
