@@ -1,55 +1,132 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { FORMATIONS, FORMATION_KEYS } from "@/components/composition/formations";
-import { MOCK_PLAYERS, type FUTPlayer } from "@/components/composition/mockPlayers";
+import { MOCK_PLAYERS, type FUTPlayer, getPositionCategory } from "@/components/composition/mockPlayers";
 import { PitchView } from "@/components/composition/PitchView";
-import { GripVertical } from "lucide-react";
+import { SquadList } from "@/components/composition/SquadList";
+
+/**
+ * Given a formation, returns the filling order for slots:
+ * GK first, then DEF right-to-left (highest x first), then MID R→L, then ATT R→L.
+ */
+function getSlotFillingOrder(formation: typeof FORMATIONS[string]): number[] {
+  const categorized: { idx: number; cat: string; x: number }[] = formation.positions.map(
+    (pos, idx) => ({ idx, cat: getPositionCategory(pos.label), x: pos.x })
+  );
+
+  const catOrder = ["GK", "DEF", "MID", "ATT"];
+  categorized.sort((a, b) => {
+    const catDiff = catOrder.indexOf(a.cat) - catOrder.indexOf(b.cat);
+    if (catDiff !== 0) return catDiff;
+    return b.x - a.x; // right to left (higher x first)
+  });
+
+  return categorized.map((c) => c.idx);
+}
 
 export default function Composition() {
   const [selectedFormation, setSelectedFormation] = useState("4-3-3");
   const formation = FORMATIONS[selectedFormation];
 
-  // assignedIds[slotIndex] = player id (or null for empty)
+  // assignedIds[slotIndex] = player id (or null)
   const [assignedIds, setAssignedIds] = useState<(string | null)[]>(() =>
-    MOCK_PLAYERS.slice(0, 11).map((p) => p.id)
+    MOCK_PLAYERS.filter((p) => p.status === "available")
+      .slice(0, 11)
+      .map((p) => p.id)
   );
 
-  const playerMap = new Map(MOCK_PLAYERS.map((p) => [p.id, p]));
+  // Substitute IDs (not on pitch but marked as sub)
+  const [substituteIds, setSubstituteIds] = useState<string[]>(() => {
+    const available = MOCK_PLAYERS.filter((p) => p.status === "available");
+    return available.slice(11, 16).map((p) => p.id);
+  });
+
+  const playerMap = useMemo(() => new Map(MOCK_PLAYERS.map((p) => [p.id, p])), []);
 
   const assignedPlayers: (FUTPlayer | null)[] = formation.positions.map(
     (_, i) => (assignedIds[i] ? playerMap.get(assignedIds[i]!) ?? null : null)
   );
 
-  const assignedSet = new Set(assignedIds.filter(Boolean));
-  const bench = MOCK_PLAYERS.filter((p) => !assignedSet.has(p.id));
+  const fillingOrder = useMemo(() => getSlotFillingOrder(formation), [formation]);
 
-  // Swap two pitch slots
+  // Add a player to the next empty slot matching their position category
+  const addPlayer = useCallback(
+    (playerId: string) => {
+      const player = playerMap.get(playerId);
+      if (!player) return;
+
+      setAssignedIds((prev) => {
+        // Already assigned?
+        if (prev.includes(playerId)) return prev;
+
+        const next = [...prev];
+        while (next.length < formation.positions.length) next.push(null);
+
+        const playerCat = getPositionCategory(player.position);
+
+        // Try to find an empty slot of same category first (in filling order)
+        for (const slotIdx of fillingOrder) {
+          if (next[slotIdx] !== null) continue;
+          const slotCat = getPositionCategory(formation.positions[slotIdx].label);
+          if (slotCat === playerCat) {
+            next[slotIdx] = playerId;
+            return next;
+          }
+        }
+
+        // Fallback: any empty slot
+        for (const slotIdx of fillingOrder) {
+          if (next[slotIdx] === null) {
+            next[slotIdx] = playerId;
+            return next;
+          }
+        }
+
+        return prev; // no empty slot
+      });
+
+      // Remove from substitutes if was there
+      setSubstituteIds((prev) => prev.filter((id) => id !== playerId));
+    },
+    [playerMap, formation, fillingOrder]
+  );
+
+  // Remove a player from the pitch
+  const removePlayer = useCallback((playerId: string) => {
+    setAssignedIds((prev) => {
+      const idx = prev.indexOf(playerId);
+      if (idx === -1) return prev;
+      const next = [...prev];
+      next[idx] = null;
+      return next;
+    });
+  }, []);
+
+  // Swap two pitch slots (drag & drop)
   const swapSlots = useCallback((fromSlot: number, toSlot: number) => {
     setAssignedIds((prev) => {
       const next = [...prev];
-      // Ensure array is long enough
       while (next.length <= Math.max(fromSlot, toSlot)) next.push(null);
       [next[fromSlot], next[toSlot]] = [next[toSlot], next[fromSlot]];
       return next;
     });
   }, []);
 
-  // Place a bench player into a slot (replacing whoever is there → goes to bench)
+  // Bench player drop onto pitch
   const placeBenchPlayer = useCallback((playerId: string, toSlot: number) => {
     setAssignedIds((prev) => {
       const next = [...prev];
       while (next.length <= toSlot) next.push(null);
-      // If that player is already on pitch in another slot, clear old slot
       const oldSlot = next.indexOf(playerId);
       if (oldSlot !== -1) next[oldSlot] = null;
       next[toSlot] = playerId;
       return next;
     });
+    setSubstituteIds((prev) => prev.filter((id) => id !== playerId));
   }, []);
 
-  // Handle formation change — keep same players, just re-map
+  // Formation change
   const handleFormationChange = (key: string) => {
     setSelectedFormation(key);
-    // Trim or pad assigned list to new formation size
     const newSize = FORMATIONS[key].positions.length;
     setAssignedIds((prev) => {
       const next = [...prev];
@@ -67,7 +144,7 @@ export default function Composition() {
             COMPOSITION
           </h1>
           <p className="text-t-secondary font-ui text-[var(--text-small)] mt-2">
-            Composition FUT — Glisse, place, domine.
+            Composition FUT — Clique pour composer ton XI.
           </p>
         </div>
 
@@ -97,103 +174,20 @@ export default function Composition() {
             players={assignedPlayers}
             onSwapSlots={swapSlots}
             onDropBenchPlayer={placeBenchPlayer}
+            onRemovePlayer={removePlayer}
           />
         </div>
 
         {/* Sidebar — squad list */}
-        <div className="space-y-4">
-          {/* Chemistry legend */}
-          <div className="bg-bg-surface-1 border border-b-subtle rounded-xl p-4">
-            <h3 className="font-display text-[14px] text-t-primary mb-3">CHIMIE</h3>
-            <div className="space-y-2">
-              {[
-                { label: "Optimale", color: "bg-[var(--chem-optimal)]" },
-                { label: "Bonne", color: "bg-[var(--chem-good)]" },
-                { label: "Faible", color: "bg-[var(--chem-weak)]" },
-                { label: "Mauvaise", color: "bg-[var(--chem-bad)]" },
-              ].map((c) => (
-                <div key={c.label} className="flex items-center gap-2">
-                  <div className={`w-6 h-1 rounded-full ${c.color}`} />
-                  <span className="font-ui text-[11px] text-t-secondary">{c.label}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Bench / squad list */}
-          <div className="bg-bg-surface-1 border border-b-subtle rounded-xl p-4">
-            <h3 className="font-display text-[14px] text-t-primary mb-1">BANC</h3>
-            <p className="font-ui text-[10px] text-t-muted mb-3">Glisse un joueur sur le terrain</p>
-            <div className="space-y-1.5 max-h-[400px] overflow-y-auto pr-1">
-              {bench.length === 0 && (
-                <p className="font-ui text-[11px] text-t-muted py-4 text-center">Tous les joueurs sont sur le terrain</p>
-              )}
-              {bench.map((player) => (
-                <div
-                  key={player.id}
-                  draggable
-                  onDragStart={(e) => {
-                    e.dataTransfer.setData("bench-player-id", player.id);
-                    e.dataTransfer.effectAllowed = "move";
-                  }}
-                  className="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-bg-surface-2 border border-b-subtle hover:bg-bg-surface-3 cursor-grab active:cursor-grabbing transition-colors select-none"
-                >
-                  <GripVertical className="h-3.5 w-3.5 text-t-muted shrink-0" />
-                  <span className="font-display text-[13px] text-t-muted w-5 text-center">
-                    #{player.jerseyNumber}
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-ui text-[12px] text-t-primary truncate">
-                      {player.firstName} {player.lastName}
-                    </p>
-                    <p className="font-ui text-[10px] text-t-muted">{player.position}</p>
-                  </div>
-                  <span
-                    className={`font-display text-[13px] ${
-                      player.rating >= 80
-                        ? "text-[var(--color-success)]"
-                        : player.rating >= 70
-                          ? "text-[var(--color-warning)]"
-                          : "text-t-primary"
-                    }`}
-                  >
-                    {player.rating}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Titulaires list */}
-          <div className="bg-bg-surface-1 border border-b-subtle rounded-xl p-4">
-            <h3 className="font-display text-[14px] text-t-primary mb-3">TITULAIRES</h3>
-            <div className="space-y-1.5">
-              {assignedPlayers.map((player, i) => (
-                <div
-                  key={i}
-                  className="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-primary-dim border border-primary-border"
-                >
-                  <span className="font-ui text-[10px] text-t-muted uppercase w-8">
-                    {formation.positions[i]?.label}
-                  </span>
-                  {player ? (
-                    <>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-ui text-[12px] text-t-primary truncate">
-                          {player.firstName} {player.lastName}
-                        </p>
-                      </div>
-                      <span className="font-display text-[13px] text-t-secondary">
-                        #{player.jerseyNumber}
-                      </span>
-                    </>
-                  ) : (
-                    <span className="font-ui text-[11px] text-t-muted italic">Vide</span>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
+        <div>
+          <SquadList
+            allPlayers={MOCK_PLAYERS}
+            assignedIds={assignedIds}
+            substituteIds={substituteIds}
+            onAddPlayer={addPlayer}
+            onRemovePlayer={removePlayer}
+            positionLabels={formation.positions.map((p) => p.label)}
+          />
         </div>
       </div>
     </div>

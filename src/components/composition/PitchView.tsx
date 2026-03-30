@@ -9,6 +9,7 @@ interface Props {
   players: (FUTPlayer | null)[];
   onSwapSlots?: (fromSlot: number, toSlot: number) => void;
   onDropBenchPlayer?: (playerId: string, toSlot: number) => void;
+  onRemovePlayer?: (playerId: string) => void;
 }
 
 type ChemLevel = "optimal" | "good" | "weak" | "bad";
@@ -22,7 +23,7 @@ function getChemistry(a: FUTPlayer, b: FUTPlayer, posA: string, posB: string): C
   return "bad";
 }
 
-export function PitchView({ formation, players, onSwapSlots, onDropBenchPlayer }: Props) {
+export function PitchView({ formation, players, onSwapSlots, onDropBenchPlayer, onRemovePlayer }: Props) {
   const [dragOverSlot, setDragOverSlot] = useState<number | null>(null);
 
   const chemScore = useMemo(() => {
@@ -143,7 +144,10 @@ export function PitchView({ formation, players, onSwapSlots, onDropBenchPlayer }
               onDrop={(e) => handleDrop(e, i)}
             >
               {player ? (
-                <div className={`${isOver ? "ring-2 ring-primary rounded-lg" : ""}`}>
+                <div
+                  className={`${isOver ? "ring-2 ring-primary rounded-lg" : ""} cursor-pointer`}
+                  onClick={() => onRemovePlayer?.(player.id)}
+                >
                   <FUTPlayerCard player={player} positionLabel={pos.label} compact />
                 </div>
               ) : (
