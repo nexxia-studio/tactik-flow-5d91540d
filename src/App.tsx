@@ -117,6 +117,16 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/composition"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <Composition />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
