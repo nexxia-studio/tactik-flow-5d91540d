@@ -5,6 +5,7 @@ import {
   Users,
   BarChart3,
   Swords,
+  Trophy,
   Dumbbell,
   Banknote,
   MessageSquare,
@@ -24,7 +25,8 @@ const mainNav = [
   { label: "Composition FUT", path: "/composition", icon: Zap },
   { label: "Joueurs", path: "/joueurs", icon: Users },
   { label: "Statistiques", path: "/statistiques", icon: BarChart3 },
-  { label: "Matchs", path: "/matchs", icon: Swords },
+  { label: "Calendrier", path: "/calendrier", icon: Swords },
+  { label: "Classement", path: "/classement", icon: Trophy },
 ];
 
 const secondaryNav = [
