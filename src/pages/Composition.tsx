@@ -222,11 +222,14 @@ export default function Composition() {
         {/* Sidebar — squad list */}
         <div>
           <SquadList
-            allPlayers={MOCK_PLAYERS}
+            allPlayers={playersWithStatus}
             assignedIds={assignedIds}
             substituteIds={substituteIds}
             onAddPlayer={addPlayer}
             onRemovePlayer={removePlayer}
+            onToggleSubstitute={toggleSubstitute}
+            onChangeStatus={changePlayerStatus}
+            maxSubstitutes={MAX_SUBSTITUTES}
             positionLabels={formation.positions.map((p) => p.label)}
           />
         </div>
