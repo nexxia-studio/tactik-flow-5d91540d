@@ -9,6 +9,8 @@ import { AppLayout } from "@/components/AppLayout";
 import Dashboard from "@/pages/Dashboard";
 import Players from "@/pages/Players";
 import Statistics from "@/pages/Statistics";
+import CalendarPage from "@/pages/CalendarPage";
+import Standings from "@/pages/Standings";
 import Auth from "@/pages/Auth";
 import OnboardingClub from "@/pages/onboarding/OnboardingClub";
 import OnboardingPlan from "@/pages/onboarding/OnboardingPlan";
