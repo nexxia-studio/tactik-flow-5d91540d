@@ -160,6 +160,9 @@ export default function Standings() {
           <div className="w-2 h-2 rounded-full bg-[var(--color-success)]" /> Promotion
         </span>
         <span className="flex items-center gap-1.5">
+          <div className="w-2 h-2 rounded-full bg-[var(--color-info)]" /> Tour Final
+        </span>
+        <span className="flex items-center gap-1.5">
           <div className="w-2 h-2 rounded-full bg-[var(--color-danger)]" /> Relégation
         </span>
         <span>MJ = Matchs joués • BP = Buts pour • BC = Buts contre</span>
