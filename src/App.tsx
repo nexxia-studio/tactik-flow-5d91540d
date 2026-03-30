@@ -11,6 +11,7 @@ import Players from "@/pages/Players";
 import Statistics from "@/pages/Statistics";
 import CalendarPage from "@/pages/CalendarPage";
 import Standings from "@/pages/Standings";
+import Composition from "@/pages/Composition";
 import Auth from "@/pages/Auth";
 import OnboardingClub from "@/pages/onboarding/OnboardingClub";
 import OnboardingPlan from "@/pages/onboarding/OnboardingPlan";
@@ -112,6 +113,16 @@ const App = () => (
                 <ProtectedRoute>
                   <AppLayout>
                     <Standings />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/composition"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <Composition />
                   </AppLayout>
                 </ProtectedRoute>
               }
