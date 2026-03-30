@@ -1,8 +1,10 @@
 import { useState, useCallback, useMemo } from "react";
 import { FORMATIONS, FORMATION_KEYS } from "@/components/composition/formations";
-import { MOCK_PLAYERS, type FUTPlayer, getPositionCategory } from "@/components/composition/mockPlayers";
+import { MOCK_PLAYERS, type FUTPlayer, type PlayerStatus, getPositionCategory } from "@/components/composition/mockPlayers";
 import { PitchView } from "@/components/composition/PitchView";
 import { SquadList } from "@/components/composition/SquadList";
+
+const MAX_SUBSTITUTES = 4;
 
 /**
  * Given a formation, returns the filling order for slots:
