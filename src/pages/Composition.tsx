@@ -42,7 +42,20 @@ export default function Composition() {
     return available.slice(11, 16).map((p) => p.id);
   });
 
-  const playerMap = useMemo(() => new Map(MOCK_PLAYERS.map((p) => [p.id, p])), []);
+  // Player status overrides
+  const [playerStatuses, setPlayerStatuses] = useState<Record<string, PlayerStatus>>(() => {
+    const map: Record<string, PlayerStatus> = {};
+    MOCK_PLAYERS.forEach((p) => { map[p.id] = p.status; });
+    return map;
+  });
+
+  // Compute players with overridden statuses
+  const playersWithStatus = useMemo(
+    () => MOCK_PLAYERS.map((p) => ({ ...p, status: playerStatuses[p.id] ?? p.status })),
+    [playerStatuses]
+  );
+
+  const playerMap = useMemo(() => new Map(playersWithStatus.map((p) => [p.id, p])), [playersWithStatus]);
 
   const assignedPlayers: (FUTPlayer | null)[] = formation.positions.map(
     (_, i) => (assignedIds[i] ? playerMap.get(assignedIds[i]!) ?? null : null)
