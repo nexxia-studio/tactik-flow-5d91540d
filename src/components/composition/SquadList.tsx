@@ -215,9 +215,15 @@ export function SquadList({
 
   const titulaires = availablePlayers.filter((p) => assignedSet.has(p.id));
   const substitutes = availablePlayers.filter((p) => substituteSet.has(p.id) && !assignedSet.has(p.id));
-  const nonSelected = availablePlayers.filter(
-    (p) => !assignedSet.has(p.id) && !substituteSet.has(p.id)
-  );
+  const POSITION_ORDER = ["GK", "RB", "RWB", "CB", "LB", "LWB", "CDM", "CM", "RM", "LM", "CAM", "RAM", "LAM", "RW", "LW", "CF", "SS", "ST"];
+  const getPositionRank = (pos: string) => {
+    const idx = POSITION_ORDER.indexOf(pos);
+    return idx === -1 ? 999 : idx;
+  };
+
+  const nonSelected = availablePlayers
+    .filter((p) => !assignedSet.has(p.id) && !substituteSet.has(p.id))
+    .sort((a, b) => getPositionRank(a.position) - getPositionRank(b.position));
 
   const titulairesByCategory = new Map<PositionCategory, FUTPlayer[]>();
   for (const cat of CATEGORY_ORDER) {
