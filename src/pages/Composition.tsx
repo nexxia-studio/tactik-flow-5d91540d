@@ -105,6 +105,32 @@ export default function Composition() {
     [playerMap, formation, fillingOrder]
   );
 
+  // Toggle substitute (bench) status
+  const toggleSubstitute = useCallback((playerId: string) => {
+    setSubstituteIds((prev) => {
+      if (prev.includes(playerId)) {
+        return prev.filter((id) => id !== playerId);
+      }
+      if (prev.length >= MAX_SUBSTITUTES) return prev;
+      return [...prev, playerId];
+    });
+  }, []);
+
+  // Change player status
+  const changePlayerStatus = useCallback((playerId: string, status: PlayerStatus) => {
+    setPlayerStatuses((prev) => ({ ...prev, [playerId]: status }));
+    if (status !== "available") {
+      setAssignedIds((prev) => {
+        const idx = prev.indexOf(playerId);
+        if (idx === -1) return prev;
+        const next = [...prev];
+        next[idx] = null;
+        return next;
+      });
+      setSubstituteIds((prev) => prev.filter((id) => id !== playerId));
+    }
+  }, []);
+
   // Remove a player from the pitch
   const removePlayer = useCallback((playerId: string) => {
     setAssignedIds((prev) => {
