@@ -8,6 +8,7 @@ import { useOnboarding } from "@/hooks/useOnboarding";
 import { AppLayout } from "@/components/AppLayout";
 import Dashboard from "@/pages/Dashboard";
 import Players from "@/pages/Players";
+import Statistics from "@/pages/Statistics";
 import Auth from "@/pages/Auth";
 import OnboardingClub from "@/pages/onboarding/OnboardingClub";
 import OnboardingPlan from "@/pages/onboarding/OnboardingPlan";
@@ -79,6 +80,16 @@ const App = () => (
                 <ProtectedRoute>
                   <AppLayout>
                     <Players />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/statistiques"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <Statistics />
                   </AppLayout>
                 </ProtectedRoute>
               }
