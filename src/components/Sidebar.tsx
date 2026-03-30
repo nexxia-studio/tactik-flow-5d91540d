@@ -6,6 +6,7 @@ import {
   BarChart3,
   Swords,
   Trophy,
+  Shield,
   Dumbbell,
   Banknote,
   MessageSquare,
