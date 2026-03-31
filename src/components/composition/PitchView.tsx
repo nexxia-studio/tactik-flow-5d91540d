@@ -15,13 +15,26 @@ interface Props {
 
 type ChemLevel = "optimal" | "good" | "weak" | "bad";
 
-function getChemistry(a: FUTPlayer, b: FUTPlayer, posA: string, posB: string): ChemLevel {
+export function getChemistry(a: FUTPlayer, b: FUTPlayer, posA: string, posB: string): ChemLevel {
   const samePosition = a.position === posA && b.position === posB;
   const bothHighRated = a.rating >= 78 && b.rating >= 78;
   if (samePosition && bothHighRated) return "optimal";
   if (samePosition) return "good";
   if (bothHighRated) return "weak";
   return "bad";
+}
+
+export function computeChemScore(formation: Formation, players: (FUTPlayer | null)[]): number {
+  let total = 0;
+  let validLinks = 0;
+  formation.links.forEach(([a, b]) => {
+    if (!players[a] || !players[b]) return;
+    validLinks++;
+    const chem = getChemistry(players[a]!, players[b]!, formation.positions[a].label, formation.positions[b].label);
+    total += chem === "optimal" ? 3 : chem === "good" ? 2 : chem === "weak" ? 1 : 0;
+  });
+  const max = validLinks * 3;
+  return max > 0 ? Math.round((total / max) * 100) : 0;
 }
 
 export function PitchView({ formation, players, onSwapSlots, onDropBenchPlayer, onRemovePlayer, readonly = false }: Props) {
