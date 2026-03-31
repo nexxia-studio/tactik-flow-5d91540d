@@ -51,6 +51,40 @@ export const MOCK_CONVOCATION_PLAYERS: ConvocationPlayer[] = [
   { id: "cp18", first_name: "Arnaud",    last_name: "Delcour",    jersey_number: 20, position: "LB",  avatar_url: null },
 ];
 
+export interface FUTComposition {
+  id: string;
+  match_id: string;
+  formation: string;
+  starters: { player_id: string; position: string }[];
+  substitutes: string[];
+}
+
+/**
+ * Mock FUT compositions linked to matches.
+ * Maps player IDs from MOCK_CONVOCATION_PLAYERS.
+ */
+export const MOCK_FUT_COMPOSITIONS: FUTComposition[] = [
+  {
+    id: "fc1",
+    match_id: "m1",
+    formation: "4-3-3",
+    starters: [
+      { player_id: "cp1", position: "GK" },
+      { player_id: "cp2", position: "RB" },
+      { player_id: "cp3", position: "CB" },
+      { player_id: "cp4", position: "CB" },
+      { player_id: "cp5", position: "LB" },
+      { player_id: "cp6", position: "CDM" },
+      { player_id: "cp8", position: "CM" },
+      { player_id: "cp9", position: "CAM" },
+      { player_id: "cp7", position: "RW" },
+      { player_id: "cp11", position: "LW" },
+      { player_id: "cp10", position: "ST" },
+    ],
+    substitutes: ["cp12", "cp13", "cp14", "cp15"],
+  },
+];
+
 export const MOCK_PAST_CONVOCATIONS: PastConvocation[] = [
   { id: "pc1", match: "vs FC Stavelot", date: "2025-01-25", players_count: 16, status: "sent" },
   { id: "pc2", match: "vs US Malmedy",  date: "2025-01-18", players_count: 14, status: "sent" },
