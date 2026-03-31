@@ -10,6 +10,7 @@ interface Props {
   onSwapSlots?: (fromSlot: number, toSlot: number) => void;
   onDropBenchPlayer?: (playerId: string, toSlot: number) => void;
   onRemovePlayer?: (playerId: string) => void;
+  readonly?: boolean;
 }
 
 type ChemLevel = "optimal" | "good" | "weak" | "bad";
