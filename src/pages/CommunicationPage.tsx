@@ -8,7 +8,7 @@ import {
   MOCK_CONVOCATION_MATCHES, MOCK_CONVOCATION_PLAYERS, MOCK_PAST_CONVOCATIONS,
   type ConvocationMatch, type ConvocationPlayer, type SelectionStatus,
 } from "@/data/mockCommunication";
-import FUTCompositionLink, { buildCompositionText } from "@/components/communication/FUTCompositionLink";
+import FUTCompositionLink from "@/components/communication/FUTCompositionLink";
 
 function formatMatchDate(iso: string) {
   const d = new Date(iso);
@@ -32,7 +32,7 @@ export default function CommunicationPage() {
   const [copied, setCopied] = useState(false);
   const [importedCompId, setImportedCompId] = useState<string>("");
   const [importedSnapshot, setImportedSnapshot] = useState<string>("");
-  const [includeComp, setIncludeComp] = useState(false);
+  
 
   const match = MOCK_CONVOCATION_MATCHES.find((m) => m.id === matchId);
 
@@ -104,14 +104,11 @@ export default function CommunicationPage() {
       lines.push("");
     }
 
-    if (includeComp && importedCompId) {
-      lines.push(buildCompositionText(importedCompId));
-      lines.push("");
-    }
+
 
     lines.push("⚠️ Confirmer ta présence avant vendredi 18h00");
     return lines.join("\n");
-  }, [match, starters, subs, message, clubName, includeComp, importedCompId]);
+  }, [match, starters, subs, message, clubName]);
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(whatsappText);
@@ -180,8 +177,6 @@ export default function CommunicationPage() {
           matchId={matchId}
           selections={selections}
           onImportComposition={handleImportComposition}
-          includeInMessage={includeComp}
-          onIncludeChange={setIncludeComp}
           wasModified={wasModified}
         />
 
