@@ -2,6 +2,16 @@ import { useState, useMemo } from "react";
 import { Calendar, MapPin, Clock, Pencil, Trash2 } from "lucide-react";
 import AddFriendlyMatchDialog from "@/components/calendar/AddFriendlyMatchDialog";
 import EditScoreDialog from "@/components/calendar/EditScoreDialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Match {
   id: string;
