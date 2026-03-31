@@ -225,14 +225,16 @@ export default function CalendarPage() {
 
               {/* Action buttons */}
               <div className="flex items-center gap-1.5 shrink-0">
-                {/* Edit score button */}
-                <button
-                  onClick={() => setEditingMatch(match)}
-                  className="w-8 h-8 rounded-lg flex items-center justify-center bg-bg-surface-2 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer hover:bg-bg-surface-1 border border-transparent hover:border-b-subtle"
-                  title="Encoder le score"
-                >
-                  <Pencil className="h-3.5 w-3.5 text-t-muted" />
-                </button>
+                {/* Edit score button — only for today or past */}
+                {new Date(match.date) <= new Date(new Date().toISOString().split("T")[0]) && (
+                  <button
+                    onClick={() => setEditingMatch(match)}
+                    className="w-8 h-8 rounded-lg flex items-center justify-center bg-bg-surface-2 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer hover:bg-bg-surface-1 border border-transparent hover:border-b-subtle"
+                    title="Encoder le score"
+                  >
+                    <Pencil className="h-3.5 w-3.5 text-t-muted" />
+                  </button>
+                )}
 
                 {/* Delete friendly match */}
                 {match.isFriendly && (
