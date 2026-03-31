@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { FORMATIONS, FORMATION_KEYS } from "@/components/composition/formations";
 import { MOCK_PLAYERS, type FUTPlayer, type PlayerStatus, getPositionCategory } from "@/components/composition/mockPlayers";
 import { PitchView, computeChemScore } from "@/components/composition/PitchView";
@@ -27,6 +28,7 @@ function getSlotFillingOrder(formation: typeof FORMATIONS[string]): number[] {
 }
 
 export default function Composition() {
+  const navigate = useNavigate();
   const [selectedFormation, setSelectedFormation] = useState("4-3-3");
   const [selectedMatchId, setSelectedMatchId] = useState<string | null>(null);
   const formation = FORMATIONS[selectedFormation];
@@ -253,7 +255,12 @@ export default function Composition() {
           {/* Send to communication */}
           <button
             disabled={!selectedMatchId}
-            onClick={() => toast.success("Composition envoyée ✓")}
+            onClick={() => {
+              const match = MOCK_COMPOSITION_MATCHES.find((m) => m.id === selectedMatchId);
+              if (match) {
+                navigate(`/communication?opponent=${encodeURIComponent(match.opponent)}`);
+              }
+            }}
             className="w-full py-3 rounded-xl font-ui text-[var(--text-body)] uppercase tracking-wider bg-primary text-primary-text hover:opacity-90 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             <Send className="w-4 h-4" />
