@@ -283,10 +283,11 @@ export default function SessionDetailPage() {
                   )}
 
                   {isUpcoming && (
-                    <button className="flex items-center gap-1.5 font-ui text-[12px] text-t-muted hover:text-primary transition-colors cursor-pointer py-1">
-                      <Plus className="h-3 w-3" />
-                      Ajouter un exercice
-                    </button>
+                    <AddDrillDialog
+                      phaseType={phaseType}
+                      existingDrillIds={phase.drills.map((d) => d.id)}
+                      onAdd={(drill) => addDrillToPhase(phaseType, drill)}
+                    />
                   )}
 
                   {/* Scrimmage: match instructions */}
