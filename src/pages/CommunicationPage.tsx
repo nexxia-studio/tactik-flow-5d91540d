@@ -177,8 +177,6 @@ export default function CommunicationPage() {
           matchId={matchId}
           selections={selections}
           onImportComposition={handleImportComposition}
-          includeInMessage={includeComp}
-          onIncludeChange={setIncludeComp}
           wasModified={wasModified}
         />
 
