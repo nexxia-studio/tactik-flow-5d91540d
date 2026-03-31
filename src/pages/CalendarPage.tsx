@@ -1,10 +1,11 @@
 import { useState, useMemo } from "react";
-import { Calendar, MapPin, Clock } from "lucide-react";
+import { Calendar, MapPin, Clock, Pencil, Trash2 } from "lucide-react";
 import AddFriendlyMatchDialog from "@/components/calendar/AddFriendlyMatchDialog";
+import EditScoreDialog from "@/components/calendar/EditScoreDialog";
 
 interface Match {
   id: string;
-  journee: number | null;   // null for friendly matches
+  journee: number | null;
   date: string;
   time: string;
   home: string;
@@ -36,7 +37,6 @@ const MOCK_MATCHES: Match[] = [
   { id: "15", journee: 15, date: "2026-03-08", time: "15:00", home: "Xhoffraix", away: "RCS Verviers", homeScore: 2, awayScore: 0, location: "Xhoffraix", isHome: true },
   { id: "16", journee: 16, date: "2026-03-15", time: "15:00", home: "JS Solwaster", away: "Xhoffraix", homeScore: 1, awayScore: 4, location: "Solwaster", isHome: false },
   { id: "17", journee: 17, date: "2026-03-22", time: "15:00", home: "Xhoffraix", away: "FC Heusy", homeScore: 3, awayScore: 1, location: "Xhoffraix", isHome: true },
-  // Upcoming
   { id: "18", journee: 18, date: "2026-04-05", time: "15:00", home: "Entente Malmedy", away: "Xhoffraix", homeScore: null, awayScore: null, location: "Malmedy", isHome: false },
   { id: "19", journee: 19, date: "2026-04-12", time: "15:00", home: "Xhoffraix", away: "RC Waimes", homeScore: null, awayScore: null, location: "Xhoffraix", isHome: true },
   { id: "20", journee: 20, date: "2026-04-19", time: "15:00", home: "AS Stavelot", away: "Xhoffraix", homeScore: null, awayScore: null, location: "Stavelot", isHome: false },
@@ -64,6 +64,7 @@ const resultStyles: Record<string, { bg: string; text: string; label: string }> 
 export default function CalendarPage() {
   const [filter, setFilter] = useState<Filter>("all");
   const [matches, setMatches] = useState<Match[]>(MOCK_MATCHES);
+  const [editingMatch, setEditingMatch] = useState<Match | null>(null);
 
   const allSorted = useMemo(() => [...matches].sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time)), [matches]);
 
@@ -92,7 +93,19 @@ export default function CalendarPage() {
     setMatches((prev) => [...prev, newMatch]);
   };
 
-  
+  const handleDeleteFriendly = (id: string) => {
+    setMatches((prev) => prev.filter((m) => m.id !== id));
+  };
+
+  const handleSaveScore = (homeScore: number, awayScore: number) => {
+    if (!editingMatch) return;
+    setMatches((prev) =>
+      prev.map((m) =>
+        m.id === editingMatch.id ? { ...m, homeScore, awayScore } : m
+      )
+    );
+    setEditingMatch(null);
+  };
 
   const formatDate = (iso: string) => {
     const d = new Date(iso);
@@ -114,7 +127,9 @@ export default function CalendarPage() {
       {/* Next match highlight */}
       {nextMatch && (
         <div className="bg-bg-surface-1 border border-primary-border rounded-xl p-5 glow-primary animate-fade-in">
-          <p className="text-label mb-3">PROCHAIN MATCH — JOURNÉE {nextMatch.journee}</p>
+          <p className="text-label mb-3">
+            PROCHAIN MATCH — {nextMatch.isFriendly ? "AMICAL" : `JOURNÉE ${nextMatch.journee}`}
+          </p>
           <div className="flex items-center justify-between">
             <div className="flex-1 text-right">
               <p className={`font-display text-[18px] leading-tight ${nextMatch.isHome ? "text-primary" : "text-t-primary"}`}>
@@ -208,21 +223,57 @@ export default function CalendarPage() {
                 </div>
               </div>
 
-              {/* Result badge */}
-              {rs && (
-                <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${rs.bg} shrink-0`}>
-                  <span className={`font-display text-[13px] ${rs.text}`}>{rs.label}</span>
-                </div>
-              )}
-              {!played && (
-                <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-bg-surface-2 shrink-0">
-                  <Calendar className="h-4 w-4 text-t-muted" />
-                </div>
-              )}
+              {/* Action buttons */}
+              <div className="flex items-center gap-1.5 shrink-0">
+                {/* Edit score button */}
+                <button
+                  onClick={() => setEditingMatch(match)}
+                  className="w-8 h-8 rounded-lg flex items-center justify-center bg-bg-surface-2 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer hover:bg-bg-surface-1 border border-transparent hover:border-b-subtle"
+                  title="Encoder le score"
+                >
+                  <Pencil className="h-3.5 w-3.5 text-t-muted" />
+                </button>
+
+                {/* Delete friendly match */}
+                {match.isFriendly && (
+                  <button
+                    onClick={() => handleDeleteFriendly(match.id)}
+                    className="w-8 h-8 rounded-lg flex items-center justify-center bg-bg-surface-2 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer hover:bg-[rgba(255,59,48,0.15)] border border-transparent hover:border-[rgba(255,59,48,0.3)]"
+                    title="Supprimer le match amical"
+                  >
+                    <Trash2 className="h-3.5 w-3.5 text-[var(--color-danger)]" />
+                  </button>
+                )}
+
+                {/* Result badge */}
+                {rs && (
+                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${rs.bg}`}>
+                    <span className={`font-display text-[13px] ${rs.text}`}>{rs.label}</span>
+                  </div>
+                )}
+                {!played && (
+                  <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-bg-surface-2">
+                    <Calendar className="h-4 w-4 text-t-muted" />
+                  </div>
+                )}
+              </div>
             </div>
           );
         })}
       </div>
+
+      {/* Edit score dialog */}
+      {editingMatch && (
+        <EditScoreDialog
+          open={!!editingMatch}
+          onOpenChange={(v) => { if (!v) setEditingMatch(null); }}
+          home={editingMatch.home}
+          away={editingMatch.away}
+          currentHomeScore={editingMatch.homeScore}
+          currentAwayScore={editingMatch.awayScore}
+          onSave={handleSaveScore}
+        />
+      )}
     </div>
   );
 }
