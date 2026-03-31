@@ -279,6 +279,29 @@ export default function CalendarPage() {
           onSave={handleSaveScore}
         />
       )}
+
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={!!deletingMatchId} onOpenChange={(v) => { if (!v) setDeletingMatchId(null); }}>
+        <AlertDialogContent className="bg-bg-base border-b-subtle">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display text-t-primary text-[14px]">SUPPRIMER LE MATCH</AlertDialogTitle>
+            <AlertDialogDescription className="text-t-secondary font-ui text-[var(--text-small)]">
+              Êtes-vous sûr de vouloir supprimer ce match amical ? Cette action est irréversible.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="font-ui bg-bg-surface-1 text-t-secondary border-b-subtle hover:bg-bg-surface-2">
+              Annuler
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              className="bg-[var(--color-danger)] text-white font-ui hover:opacity-90"
+            >
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
