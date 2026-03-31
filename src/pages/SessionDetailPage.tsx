@@ -4,7 +4,7 @@ import {
   ArrowLeft, Pencil, ChevronDown, ChevronUp, Trash2,
   Youtube, Clock, Plus, Save, GripVertical,
 } from "lucide-react";
-import { MOCK_TRAININGS, PHASE_META, type Training, type TrainingPhase, type AttendanceStatus, type PhaseType } from "@/data/mockTrainings";
+import { MOCK_TRAININGS, PHASE_META, type Training, type TrainingPhase, type AttendanceStatus, type PhaseType, type Drill } from "@/data/mockTrainings";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import AddDrillDialog from "@/components/trainings/AddDrillDialog";
