@@ -1,18 +1,19 @@
 import { useState, useMemo } from "react";
-import { Calendar, ChevronRight, MapPin, Clock } from "lucide-react";
+import { Calendar, MapPin, Clock } from "lucide-react";
+import AddFriendlyMatchDialog from "@/components/calendar/AddFriendlyMatchDialog";
 
-/* ── Mock match data ── */
 interface Match {
   id: string;
-  journee: number;
-  date: string;         // ISO date
+  journee: number | null;   // null for friendly matches
+  date: string;
   time: string;
   home: string;
   away: string;
   homeScore: number | null;
   awayScore: number | null;
   location: string;
-  isHome: boolean;       // is our team home?
+  isHome: boolean;
+  isFriendly?: boolean;
 }
 
 const OUR_TEAM = "Xhoffraix";
@@ -62,14 +63,36 @@ const resultStyles: Record<string, { bg: string; text: string; label: string }> 
 
 export default function CalendarPage() {
   const [filter, setFilter] = useState<Filter>("all");
+  const [matches, setMatches] = useState<Match[]>(MOCK_MATCHES);
+
+  const allSorted = useMemo(() => [...matches].sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time)), [matches]);
 
   const filtered = useMemo(() => {
-    if (filter === "played") return MOCK_MATCHES.filter((m) => m.homeScore !== null);
-    if (filter === "upcoming") return MOCK_MATCHES.filter((m) => m.homeScore === null);
-    return MOCK_MATCHES;
-  }, [filter]);
+    if (filter === "played") return allSorted.filter((m) => m.homeScore !== null);
+    if (filter === "upcoming") return allSorted.filter((m) => m.homeScore === null);
+    return allSorted;
+  }, [filter, allSorted]);
 
-  const nextMatch = MOCK_MATCHES.find((m) => m.homeScore === null);
+  const nextMatch = allSorted.find((m) => m.homeScore === null);
+
+  const handleAddFriendly = (data: { opponent: string; isHome: boolean; date: string; time: string; location: string }) => {
+    const newMatch: Match = {
+      id: `friendly-${Date.now()}`,
+      journee: null,
+      date: data.date,
+      time: data.time,
+      home: data.isHome ? OUR_TEAM : data.opponent,
+      away: data.isHome ? data.opponent : OUR_TEAM,
+      homeScore: null,
+      awayScore: null,
+      location: data.location,
+      isHome: data.isHome,
+      isFriendly: true,
+    };
+    setMatches((prev) => [...prev, newMatch]);
+  };
+
+  
 
   const formatDate = (iso: string) => {
     const d = new Date(iso);
@@ -119,7 +142,7 @@ export default function CalendarPage() {
       )}
 
       {/* Filters */}
-      <div className="flex gap-1.5">
+      <div className="flex gap-1.5 items-center">
         {([
           { key: "all" as Filter, label: "Tous" },
           { key: "played" as Filter, label: "Joués" },
@@ -137,6 +160,9 @@ export default function CalendarPage() {
             {f.label}
           </button>
         ))}
+        <div className="ml-auto">
+          <AddFriendlyMatchDialog onAdd={handleAddFriendly} />
+        </div>
       </div>
 
       {/* Match list */}
@@ -152,8 +178,8 @@ export default function CalendarPage() {
               className="bg-bg-surface-1 border border-b-subtle rounded-xl p-4 flex items-center gap-4 hover:border-b-default transition-all animate-fade-in group"
             >
               {/* Journée badge */}
-              <div className="w-10 h-10 rounded-lg bg-bg-surface-2 flex items-center justify-center shrink-0">
-                <span className="font-display text-[12px] text-t-muted">J{match.journee}</span>
+              <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${match.isFriendly ? "bg-[rgba(22,255,110,0.1)] border border-primary-border" : "bg-bg-surface-2"}`}>
+                <span className="font-display text-[12px] text-t-muted">{match.isFriendly ? "AM" : `J${match.journee}`}</span>
               </div>
 
               {/* Teams & score */}
