@@ -65,6 +65,7 @@ export default function CalendarPage() {
   const [filter, setFilter] = useState<Filter>("all");
   const [matches, setMatches] = useState<Match[]>(MOCK_MATCHES);
   const [editingMatch, setEditingMatch] = useState<Match | null>(null);
+  const [deletingMatchId, setDeletingMatchId] = useState<string | null>(null);
 
   const allSorted = useMemo(() => [...matches].sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time)), [matches]);
 
@@ -93,8 +94,10 @@ export default function CalendarPage() {
     setMatches((prev) => [...prev, newMatch]);
   };
 
-  const handleDeleteFriendly = (id: string) => {
-    setMatches((prev) => prev.filter((m) => m.id !== id));
+  const handleConfirmDelete = () => {
+    if (!deletingMatchId) return;
+    setMatches((prev) => prev.filter((m) => m.id !== deletingMatchId));
+    setDeletingMatchId(null);
   };
 
   const handleSaveScore = (homeScore: number, awayScore: number) => {
