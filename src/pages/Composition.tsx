@@ -279,6 +279,7 @@ export default function Composition() {
             onChangeStatus={changePlayerStatus}
             maxSubstitutes={MAX_SUBSTITUTES}
             positionLabels={formation.positions.map((p) => p.label)}
+            isFriendly={isFriendly}
           />
         </div>
       </div>
