@@ -92,7 +92,7 @@ export default function CalendarPage() {
     setMatches((prev) => [...prev, newMatch]);
   };
 
-  const nextMatch = MOCK_MATCHES.find((m) => m.homeScore === null);
+  
 
   const formatDate = (iso: string) => {
     const d = new Date(iso);
