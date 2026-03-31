@@ -2,7 +2,8 @@ import { useState, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Plus, Search, Youtube, Clock } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Plus, Search, Youtube, Clock, BookOpen, PenLine } from "lucide-react";
 import type { Drill, DrillSource, PhaseType } from "@/data/mockTrainings";
 import { PHASE_META } from "@/data/mockTrainings";
 
@@ -59,6 +60,12 @@ export default function AddDrillDialog({ phaseType, existingDrillIds, onAdd }: A
   const [sourceFilter, setSourceFilter] = useState<DrillSource | "all">("all");
   const [categoryFilter, setCategoryFilter] = useState<PhaseType | "all">(phaseType);
 
+  const [tab, setTab] = useState<"library" | "create">("library");
+  const [customName, setCustomName] = useState("");
+  const [customDuration, setCustomDuration] = useState("10");
+  const [customSource, setCustomSource] = useState<DrillSource>("manual");
+  const [customUrl, setCustomUrl] = useState("");
+
   const filtered = useMemo(() => {
     return DRILL_LIBRARY.filter((d) => {
       if (categoryFilter !== "all" && d.category !== categoryFilter) return false;
@@ -79,6 +86,23 @@ export default function AddDrillDialog({ phaseType, existingDrillIds, onAdd }: A
     onAdd(newDrill);
     setOpen(false);
     setSearch("");
+  };
+
+  const handleCreateCustom = () => {
+    if (!customName.trim()) return;
+    const newDrill: Drill = {
+      id: `drill-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      name: customName.trim(),
+      duration: parseInt(customDuration) || 10,
+      source: customSource,
+      source_url: customSource !== "manual" && customUrl.trim() ? customUrl.trim() : undefined,
+    };
+    onAdd(newDrill);
+    setOpen(false);
+    setCustomName("");
+    setCustomDuration("10");
+    setCustomSource("manual");
+    setCustomUrl("");
   };
 
   function getSourceIcon(source: DrillSource) {
@@ -104,97 +128,188 @@ export default function AddDrillDialog({ phaseType, existingDrillIds, onAdd }: A
           </DialogTitle>
         </DialogHeader>
 
-        {/* Search */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-t-muted" />
-          <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Rechercher un exercice..."
-            className="pl-9 bg-bg-surface-2 border-b-subtle font-ui text-[13px] text-t-primary"
-          />
-        </div>
-
-        {/* Filters row */}
-        <div className="space-y-2">
-          {/* Source filter */}
-          <div className="flex gap-1.5 flex-wrap">
-            {SOURCE_FILTERS.map((sf) => (
-              <button
-                key={sf.value}
-                onClick={() => setSourceFilter(sf.value)}
-                className={`px-2.5 py-1 rounded-lg font-ui text-[11px] transition-all cursor-pointer flex items-center gap-1 ${
-                  sourceFilter === sf.value
-                    ? "bg-primary text-primary-text"
-                    : "bg-bg-surface-2 text-t-secondary border border-b-subtle hover:bg-bg-surface-2/80"
-                }`}
-              >
-                {sf.icon}
-                {sf.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Category filter */}
-          <div className="flex gap-1.5 flex-wrap">
+        {/* Tabs */}
+        <div className="flex gap-1.5">
+          {([
+            { key: "library" as const, label: "Bibliothèque", icon: BookOpen },
+            { key: "create" as const, label: "Créer", icon: PenLine },
+          ]).map((t) => (
             <button
-              onClick={() => setCategoryFilter("all")}
-              className={`px-2.5 py-1 rounded-lg font-ui text-[11px] transition-all cursor-pointer ${
-                categoryFilter === "all"
+              key={t.key}
+              onClick={() => setTab(t.key)}
+              className={`px-3 py-1.5 rounded-lg font-ui text-[12px] transition-all cursor-pointer flex items-center gap-1.5 ${
+                tab === t.key
                   ? "bg-primary text-primary-text"
                   : "bg-bg-surface-2 text-t-secondary border border-b-subtle hover:bg-bg-surface-2/80"
               }`}
             >
-              Toutes phases
+              <t.icon className="h-3.5 w-3.5" />
+              {t.label}
             </button>
-            {(["warmup", "tactical", "technical", "scrimmage"] as PhaseType[]).map((pt) => (
-              <button
-                key={pt}
-                onClick={() => setCategoryFilter(pt)}
-                className={`px-2.5 py-1 rounded-lg font-ui text-[11px] transition-all cursor-pointer flex items-center gap-1 ${
-                  categoryFilter === pt
-                    ? "bg-primary text-primary-text"
-                    : "bg-bg-surface-2 text-t-secondary border border-b-subtle hover:bg-bg-surface-2/80"
-                }`}
-              >
-                <span className="text-[10px]">{PHASE_META[pt].icon}</span>
-                {PHASE_META[pt].label}
-              </button>
-            ))}
-          </div>
+          ))}
         </div>
 
-        {/* Results */}
-        <div className="flex-1 overflow-y-auto space-y-1 min-h-0 -mx-1 px-1">
-          {filtered.length === 0 ? (
-            <p className="font-ui text-[12px] text-t-muted text-center py-8 italic">
-              Aucun exercice trouvé
-            </p>
-          ) : (
-            filtered.map((drill) => {
-              const alreadyAdded = existingDrillIds.includes(drill.id);
-              return (
+        {tab === "library" ? (
+          <>
+            {/* Search */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-t-muted" />
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Rechercher un exercice..."
+                className="pl-9 bg-bg-surface-2 border-b-subtle font-ui text-[13px] text-t-primary"
+              />
+            </div>
+
+            {/* Filters row */}
+            <div className="space-y-2">
+              <div className="flex gap-1.5 flex-wrap">
+                {SOURCE_FILTERS.map((sf) => (
+                  <button
+                    key={sf.value}
+                    onClick={() => setSourceFilter(sf.value)}
+                    className={`px-2.5 py-1 rounded-lg font-ui text-[11px] transition-all cursor-pointer flex items-center gap-1 ${
+                      sourceFilter === sf.value
+                        ? "bg-primary text-primary-text"
+                        : "bg-bg-surface-2 text-t-secondary border border-b-subtle hover:bg-bg-surface-2/80"
+                    }`}
+                  >
+                    {sf.icon}
+                    {sf.label}
+                  </button>
+                ))}
+              </div>
+              <div className="flex gap-1.5 flex-wrap">
                 <button
-                  key={drill.id}
-                  onClick={() => handleAdd(drill)}
-                  className="w-full flex items-center gap-3 bg-bg-surface-2 hover:bg-bg-surface-2/80 rounded-lg px-3 py-2.5 transition-all cursor-pointer text-left group"
+                  onClick={() => setCategoryFilter("all")}
+                  className={`px-2.5 py-1 rounded-lg font-ui text-[11px] transition-all cursor-pointer ${
+                    categoryFilter === "all"
+                      ? "bg-primary text-primary-text"
+                      : "bg-bg-surface-2 text-t-secondary border border-b-subtle hover:bg-bg-surface-2/80"
+                  }`}
                 >
-                  <span className="text-[12px]">{PHASE_META[drill.category].icon}</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-ui text-[13px] text-t-primary truncate">{drill.name}</p>
-                    <p className="font-ui text-[11px] text-t-muted">{PHASE_META[drill.category].label}</p>
-                  </div>
-                  <span className="font-ui text-[11px] text-t-muted flex items-center gap-1 shrink-0">
-                    <Clock className="h-3 w-3" />
-                    {drill.duration}'
-                  </span>
-                  {getSourceIcon(drill.source)}
-                  <Plus className="h-3.5 w-3.5 text-t-muted group-hover:text-primary transition-colors shrink-0" />
+                  Toutes phases
                 </button>
-              );
-            })
-          )}
-        </div>
+                {(["warmup", "tactical", "technical", "scrimmage"] as PhaseType[]).map((pt) => (
+                  <button
+                    key={pt}
+                    onClick={() => setCategoryFilter(pt)}
+                    className={`px-2.5 py-1 rounded-lg font-ui text-[11px] transition-all cursor-pointer flex items-center gap-1 ${
+                      categoryFilter === pt
+                        ? "bg-primary text-primary-text"
+                        : "bg-bg-surface-2 text-t-secondary border border-b-subtle hover:bg-bg-surface-2/80"
+                    }`}
+                  >
+                    <span className="text-[10px]">{PHASE_META[pt].icon}</span>
+                    {PHASE_META[pt].label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Results */}
+            <div className="flex-1 overflow-y-auto space-y-1 min-h-0 -mx-1 px-1">
+              {filtered.length === 0 ? (
+                <p className="font-ui text-[12px] text-t-muted text-center py-8 italic">
+                  Aucun exercice trouvé
+                </p>
+              ) : (
+                filtered.map((drill) => (
+                  <button
+                    key={drill.id}
+                    onClick={() => handleAdd(drill)}
+                    className="w-full flex items-center gap-3 bg-bg-surface-2 hover:bg-bg-surface-2/80 rounded-lg px-3 py-2.5 transition-all cursor-pointer text-left group"
+                  >
+                    <span className="text-[12px]">{PHASE_META[drill.category].icon}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-ui text-[13px] text-t-primary truncate">{drill.name}</p>
+                      <p className="font-ui text-[11px] text-t-muted">{PHASE_META[drill.category].label}</p>
+                    </div>
+                    <span className="font-ui text-[11px] text-t-muted flex items-center gap-1 shrink-0">
+                      <Clock className="h-3 w-3" />
+                      {drill.duration}'
+                    </span>
+                    {getSourceIcon(drill.source)}
+                    <Plus className="h-3.5 w-3.5 text-t-muted group-hover:text-primary transition-colors shrink-0" />
+                  </button>
+                ))
+              )}
+            </div>
+          </>
+        ) : (
+          /* Create custom drill form */
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <Label className="font-ui text-[12px] text-t-secondary">Nom de l'exercice *</Label>
+              <Input
+                value={customName}
+                onChange={(e) => setCustomName(e.target.value)}
+                placeholder="Ex: Passes longues diagonales"
+                className="bg-bg-surface-2 border-b-subtle font-ui text-[13px] text-t-primary"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="font-ui text-[12px] text-t-secondary">Durée (minutes)</Label>
+              <Input
+                type="number"
+                min="1"
+                max="90"
+                value={customDuration}
+                onChange={(e) => setCustomDuration(e.target.value)}
+                className="bg-bg-surface-2 border-b-subtle font-ui text-[13px] text-t-primary w-24"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="font-ui text-[12px] text-t-secondary">Source</Label>
+              <div className="flex gap-1.5">
+                {([
+                  { value: "manual" as DrillSource, label: "Manuel", icon: <span className="text-[10px]">📋</span> },
+                  { value: "youtube" as DrillSource, label: "YouTube", icon: <Youtube className="h-3 w-3 text-[#FF0000]" /> },
+                  { value: "tiktok" as DrillSource, label: "TikTok", icon: <span className="text-[10px]">🎵</span> },
+                ]).map((s) => (
+                  <button
+                    key={s.value}
+                    onClick={() => setCustomSource(s.value)}
+                    className={`px-3 py-1.5 rounded-lg font-ui text-[11px] transition-all cursor-pointer flex items-center gap-1.5 ${
+                      customSource === s.value
+                        ? "bg-primary text-primary-text"
+                        : "bg-bg-surface-2 text-t-secondary border border-b-subtle hover:bg-bg-surface-2/80"
+                    }`}
+                  >
+                    {s.icon}
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {customSource !== "manual" && (
+              <div className="space-y-1.5">
+                <Label className="font-ui text-[12px] text-t-secondary">
+                  URL {customSource === "youtube" ? "YouTube" : "TikTok"}
+                </Label>
+                <Input
+                  value={customUrl}
+                  onChange={(e) => setCustomUrl(e.target.value)}
+                  placeholder={customSource === "youtube" ? "https://youtube.com/watch?v=..." : "https://tiktok.com/@.../video/..."}
+                  className="bg-bg-surface-2 border-b-subtle font-ui text-[13px] text-t-primary"
+                />
+              </div>
+            )}
+
+            <Button
+              onClick={handleCreateCustom}
+              disabled={!customName.trim()}
+              className="w-full bg-primary text-primary-text font-ui hover:opacity-90 flex items-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Ajouter l'exercice
+            </Button>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
