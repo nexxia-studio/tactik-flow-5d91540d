@@ -7,6 +7,7 @@ import {
 import { MOCK_TRAININGS, PHASE_META, type Training, type TrainingPhase, type AttendanceStatus, type PhaseType } from "@/data/mockTrainings";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import AddDrillDialog from "@/components/trainings/AddDrillDialog";
 
 const PHASE_ORDER: PhaseType[] = ["warmup", "tactical", "technical", "scrimmage"];
 
