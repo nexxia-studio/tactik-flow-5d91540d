@@ -49,7 +49,20 @@ export default function SessionDetailPage() {
   const [expandedPhases, setExpandedPhases] = useState<Record<PhaseType, boolean>>({
     warmup: true, tactical: true, technical: true, scrimmage: true,
   });
-  const [notes, setNotes] = useState(training?.notes || "");
+  const [notes, setNotes] = useState(initialTraining?.notes || "");
+
+  // Attendance stats
+  const attStats = useMemo(() => {
+    if (!training) return { present: 0, late: 0, absent: 0, excused: 0, total: 0, attended: 0, rate: 0 };
+    const present = training.attendance.filter((a) => a.status === "present").length;
+    const late = training.attendance.filter((a) => a.status === "late").length;
+    const absent = training.attendance.filter((a) => a.status === "absent").length;
+    const excused = training.attendance.filter((a) => a.status === "excused").length;
+    const total = training.attendance.length;
+    const attended = present + late;
+    const rate = total > 0 ? Math.round((attended / total) * 100) : 0;
+    return { present, late, absent, excused, total, attended, rate };
+  }, [training]);
 
   if (!training) {
     return (
@@ -61,29 +74,6 @@ export default function SessionDetailPage() {
       </div>
     );
   }
-
-  const isUpcoming = training.status === "planned";
-  const isCompleted = training.status === "completed";
-
-  const togglePhase = (type: PhaseType) => {
-    setExpandedPhases((prev) => ({ ...prev, [type]: !prev[type] }));
-  };
-
-  const totalDuration = training.phases.reduce((sum, p) => sum + p.duration, 0);
-  const totalHours = Math.floor(totalDuration / 60);
-  const totalMins = totalDuration % 60;
-
-  // Attendance stats
-  const attStats = useMemo(() => {
-    const present = training.attendance.filter((a) => a.status === "present").length;
-    const late = training.attendance.filter((a) => a.status === "late").length;
-    const absent = training.attendance.filter((a) => a.status === "absent").length;
-    const excused = training.attendance.filter((a) => a.status === "excused").length;
-    const total = training.attendance.length;
-    const attended = present + late;
-    const rate = total > 0 ? Math.round((attended / total) * 100) : 0;
-    return { present, late, absent, excused, total, attended, rate };
-  }, [training.attendance]);
 
   const updateAttendance = (playerId: string, status: AttendanceStatus) => {
     setTraining((prev) => {
