@@ -30,6 +30,9 @@ export default function CommunicationPage() {
   const [selections, setSelections] = useState<Record<string, SelectionStatus>>({});
   const [message, setMessage] = useState("");
   const [copied, setCopied] = useState(false);
+  const [importedCompId, setImportedCompId] = useState<string>("");
+  const [importedSnapshot, setImportedSnapshot] = useState<string>("");
+  const [includeComp, setIncludeComp] = useState(false);
 
   const match = MOCK_CONVOCATION_MATCHES.find((m) => m.id === matchId);
 
