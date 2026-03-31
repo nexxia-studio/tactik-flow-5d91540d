@@ -1,5 +1,7 @@
 /* ── Communication mock data ── */
 
+export type SelectionStatus = "starter" | "sub" | null;
+
 export interface ConvocationMatch {
   id: string;
   opponent: string;
