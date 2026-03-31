@@ -108,7 +108,7 @@ export default function CommunicationPage() {
 
     lines.push("⚠️ Confirmer ta présence avant vendredi 18h00");
     return lines.join("\n");
-  }, [match, starters, subs, message, clubName, includeComp, importedCompId]);
+  }, [match, starters, subs, message, clubName]);
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(whatsappText);
