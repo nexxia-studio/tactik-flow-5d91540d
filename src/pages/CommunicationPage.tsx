@@ -159,10 +159,10 @@ export default function CommunicationPage() {
 
         {/* Step 2 — Player selection */}
         <div className="space-y-3">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <p className="font-ui text-[11px] text-t-muted uppercase tracking-wider">Étape 2 — Sélection</p>
-            <div className="flex items-center gap-3">
-              <span className="font-ui text-[12px] text-t-secondary">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+              <span className="font-ui text-[11px] sm:text-[12px] text-t-secondary">
                 {starters.length} titulaires / {subs.length} remplaçants / {notSelected.length} non convoqués
               </span>
               <button onClick={selectAll} className="font-ui text-[11px] text-primary hover:underline cursor-pointer">Tout sélectionner</button>
@@ -238,7 +238,7 @@ export default function CommunicationPage() {
             <div className="bg-[#0B3D2E] border border-[#1A5C40] rounded-xl p-4 font-ui text-[13px] text-[#E0F0E6] whitespace-pre-wrap leading-relaxed">
               {whatsappText}
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <Button
                 onClick={handleCopy}
                 className="bg-primary text-primary-text font-ui hover:opacity-90 flex items-center gap-2"
