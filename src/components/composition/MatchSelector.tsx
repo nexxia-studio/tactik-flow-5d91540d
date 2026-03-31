@@ -6,13 +6,15 @@ export interface CompositionMatch {
   date: string;
   is_home: boolean;
   played: boolean;
+  type: "championship" | "friendly";
 }
 
 export const MOCK_COMPOSITION_MATCHES: CompositionMatch[] = [
-  { id: "cm1", opponent: "FC Battice", date: "2025-04-06T15:00:00", is_home: true, played: false },
-  { id: "cm2", opponent: "US Thimister", date: "2025-04-13T15:00:00", is_home: false, played: false },
-  { id: "cm3", opponent: "RFC Stavelot", date: "2025-01-25T15:00:00", is_home: true, played: true },
-  { id: "cm4", opponent: "US Malmedy", date: "2025-01-18T14:30:00", is_home: false, played: true },
+  { id: "cm1", opponent: "FC Battice", date: "2025-04-06T15:00:00", is_home: true, played: false, type: "championship" },
+  { id: "cm2", opponent: "US Thimister", date: "2025-04-13T15:00:00", is_home: false, played: false, type: "championship" },
+  { id: "cm3", opponent: "RFC Stavelot", date: "2025-01-25T15:00:00", is_home: true, played: true, type: "championship" },
+  { id: "cm4", opponent: "US Malmedy", date: "2025-01-18T14:30:00", is_home: false, played: true, type: "championship" },
+  { id: "cm5", opponent: "FC Eupen B", date: "2025-04-20T14:00:00", is_home: true, played: false, type: "friendly" },
 ];
 
 interface Props {

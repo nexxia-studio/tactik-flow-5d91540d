@@ -37,6 +37,7 @@ export default function Composition() {
     ? MOCK_COMPOSITION_MATCHES.find((m) => m.id === selectedMatchId) ?? null
     : null;
   const isReadonly = selectedMatch?.played ?? false;
+  const isFriendly = selectedMatch?.type === "friendly";
 
   const [assignedIds, setAssignedIds] = useState<(string | null)[]>(() =>
     MOCK_PLAYERS.filter((p) => p.status === "available").slice(0, 11).map((p) => p.id)
@@ -278,6 +279,7 @@ export default function Composition() {
             onChangeStatus={changePlayerStatus}
             maxSubstitutes={MAX_SUBSTITUTES}
             positionLabels={formation.positions.map((p) => p.label)}
+            isFriendly={isFriendly}
           />
         </div>
       </div>
