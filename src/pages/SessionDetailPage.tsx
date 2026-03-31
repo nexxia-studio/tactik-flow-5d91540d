@@ -92,6 +92,19 @@ export default function SessionDetailPage() {
   };
 
   // Attendance stats
+  const addDrillToPhase = (phaseType: PhaseType, drill: Drill) => {
+    setTraining((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        phases: prev.phases.map((phase) => {
+          if (phase.type !== phaseType) return phase;
+          return { ...phase, drills: [...phase.drills, drill] };
+        }),
+      };
+    });
+  };
+
   const attStats = useMemo(() => {
     if (!training) return { present: 0, late: 0, absent: 0, excused: 0, total: 0, attended: 0, rate: 0 };
     const present = training.attendance.filter((a) => a.status === "present").length;
