@@ -60,6 +60,12 @@ export default function AddDrillDialog({ phaseType, existingDrillIds, onAdd }: A
   const [sourceFilter, setSourceFilter] = useState<DrillSource | "all">("all");
   const [categoryFilter, setCategoryFilter] = useState<PhaseType | "all">(phaseType);
 
+  const [tab, setTab] = useState<"library" | "create">("library");
+  const [customName, setCustomName] = useState("");
+  const [customDuration, setCustomDuration] = useState("10");
+  const [customSource, setCustomSource] = useState<DrillSource>("manual");
+  const [customUrl, setCustomUrl] = useState("");
+
   const filtered = useMemo(() => {
     return DRILL_LIBRARY.filter((d) => {
       if (categoryFilter !== "all" && d.category !== categoryFilter) return false;
@@ -80,6 +86,23 @@ export default function AddDrillDialog({ phaseType, existingDrillIds, onAdd }: A
     onAdd(newDrill);
     setOpen(false);
     setSearch("");
+  };
+
+  const handleCreateCustom = () => {
+    if (!customName.trim()) return;
+    const newDrill: Drill = {
+      id: `drill-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      name: customName.trim(),
+      duration: parseInt(customDuration) || 10,
+      source: customSource,
+      source_url: customSource !== "manual" && customUrl.trim() ? customUrl.trim() : undefined,
+    };
+    onAdd(newDrill);
+    setOpen(false);
+    setCustomName("");
+    setCustomDuration("10");
+    setCustomSource("manual");
+    setCustomUrl("");
   };
 
   function getSourceIcon(source: DrillSource) {
