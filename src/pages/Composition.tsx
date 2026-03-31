@@ -28,6 +28,7 @@ function getSlotFillingOrder(formation: typeof FORMATIONS[string]): number[] {
 }
 
 export default function Composition() {
+  const navigate = useNavigate();
   const [selectedFormation, setSelectedFormation] = useState("4-3-3");
   const [selectedMatchId, setSelectedMatchId] = useState<string | null>(null);
   const formation = FORMATIONS[selectedFormation];
