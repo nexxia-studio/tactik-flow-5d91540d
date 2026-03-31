@@ -16,6 +16,7 @@ import TeamPage from "@/pages/Team";
 import TrainingsPage from "@/pages/TrainingsPage";
 import SessionDetailPage from "@/pages/SessionDetailPage";
 import FinesPage from "@/pages/FinesPage";
+import CommunicationPage from "@/pages/CommunicationPage";
 import Auth from "@/pages/Auth";
 import OnboardingClub from "@/pages/onboarding/OnboardingClub";
 import OnboardingPlan from "@/pages/onboarding/OnboardingPlan";
