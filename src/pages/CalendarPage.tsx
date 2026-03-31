@@ -178,8 +178,8 @@ export default function CalendarPage() {
               className="bg-bg-surface-1 border border-b-subtle rounded-xl p-4 flex items-center gap-4 hover:border-b-default transition-all animate-fade-in group"
             >
               {/* Journée badge */}
-              <div className="w-10 h-10 rounded-lg bg-bg-surface-2 flex items-center justify-center shrink-0">
-                <span className="font-display text-[12px] text-t-muted">J{match.journee}</span>
+              <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${match.isFriendly ? "bg-[rgba(22,255,110,0.1)] border border-primary-border" : "bg-bg-surface-2"}`}>
+                <span className="font-display text-[12px] text-t-muted">{match.isFriendly ? "AM" : `J${match.journee}`}</span>
               </div>
 
               {/* Teams & score */}
