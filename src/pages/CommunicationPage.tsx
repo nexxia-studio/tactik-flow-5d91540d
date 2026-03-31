@@ -104,10 +104,7 @@ export default function CommunicationPage() {
       lines.push("");
     }
 
-    if (includeComp && importedCompId) {
-      lines.push(buildCompositionText(importedCompId));
-      lines.push("");
-    }
+
 
     lines.push("⚠️ Confirmer ta présence avant vendredi 18h00");
     return lines.join("\n");
