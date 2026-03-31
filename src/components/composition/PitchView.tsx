@@ -40,18 +40,7 @@ export function computeChemScore(formation: Formation, players: (FUTPlayer | nul
 export function PitchView({ formation, players, onSwapSlots, onDropBenchPlayer, onRemovePlayer, readonly = false }: Props) {
   const [dragOverSlot, setDragOverSlot] = useState<number | null>(null);
 
-  const chemScore = useMemo(() => {
-    let total = 0;
-    let validLinks = 0;
-    formation.links.forEach(([a, b]) => {
-      if (!players[a] || !players[b]) return;
-      validLinks++;
-      const chem = getChemistry(players[a]!, players[b]!, formation.positions[a].label, formation.positions[b].label);
-      total += chem === "optimal" ? 3 : chem === "good" ? 2 : chem === "weak" ? 1 : 0;
-    });
-    const max = validLinks * 3;
-    return max > 0 ? Math.round((total / max) * 100) : 0;
-  }, [formation, players]);
+  const chemScore = useMemo(() => computeChemScore(formation, players), [formation, players]);
 
   const handleDragOver = useCallback((e: React.DragEvent, slotIndex: number) => {
     e.preventDefault();
