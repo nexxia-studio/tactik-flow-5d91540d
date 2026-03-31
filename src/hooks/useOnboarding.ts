@@ -10,7 +10,7 @@ interface OnboardingState {
 }
 
 export function useOnboarding(): OnboardingState {
-  const { user } = useAuth();
+  const { user, isReady } = useAuth();
   const [loading, setLoading] = useState(true);
   const [onboardingCompleted, setOnboardingCompleted] = useState(false);
   const [organizationId, setOrganizationId] = useState<string | null>(null);
@@ -35,8 +35,9 @@ export function useOnboarding(): OnboardingState {
   };
 
   useEffect(() => {
+    if (!isReady) return;
     fetchProfile();
-  }, [user]);
+  }, [user, isReady]);
 
   return { loading, onboardingCompleted, organizationId, refetch: fetchProfile };
 }
