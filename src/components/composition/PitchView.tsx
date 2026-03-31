@@ -131,18 +131,19 @@ export function PitchView({ formation, players, onSwapSlots, onDropBenchPlayer, 
             <div
               key={i}
               className={`absolute transform -translate-x-1/2 -translate-y-1/2 transition-transform duration-150 ${
-                player ? "cursor-grab active:cursor-grabbing" : ""
+                !readonly && player ? "cursor-grab active:cursor-grabbing" : ""
               } ${isOver ? "scale-110" : ""}`}
               style={{
                 left: `${pos.x}%`,
                 top: `${pos.y}%`,
                 zIndex: isOver ? 10 : 2,
               }}
-              draggable={!!player}
-              onDragStart={(e) => handleDragStart(e, i)}
-              onDragOver={(e) => handleDragOver(e, i)}
-              onDragLeave={handleDragLeave}
-              onDrop={(e) => handleDrop(e, i)}
+              draggable={!readonly && !!player}
+              onDragStart={readonly ? undefined : (e) => handleDragStart(e, i)}
+              onDragOver={readonly ? undefined : (e) => handleDragOver(e, i)}
+              onDragLeave={readonly ? undefined : handleDragLeave}
+              onDrop={readonly ? undefined : (e) => handleDrop(e, i)}
+            >
             >
               {player ? (
                 <div
