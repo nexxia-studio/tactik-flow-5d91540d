@@ -1,8 +1,8 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Pencil, ChevronDown, ChevronUp, Trash2,
-  Youtube, Clock, Plus, Save,
+  Youtube, Clock, Plus, Save, GripVertical,
 } from "lucide-react";
 import { MOCK_TRAININGS, PHASE_META, type Training, type TrainingPhase, type AttendanceStatus, type PhaseType } from "@/data/mockTrainings";
 import { Textarea } from "@/components/ui/textarea";
@@ -50,6 +50,45 @@ export default function SessionDetailPage() {
     warmup: true, tactical: true, technical: true, scrimmage: true,
   });
   const [notes, setNotes] = useState(initialTraining?.notes || "");
+  const dragItem = useRef<{ phaseType: PhaseType; index: number } | null>(null);
+  const dragOverItem = useRef<{ phaseType: PhaseType; index: number } | null>(null);
+
+  const handleDragStart = (phaseType: PhaseType, index: number) => {
+    dragItem.current = { phaseType, index };
+  };
+
+  const handleDragEnter = (phaseType: PhaseType, index: number) => {
+    dragOverItem.current = { phaseType, index };
+  };
+
+  const handleDragEnd = () => {
+    if (!dragItem.current || !dragOverItem.current) return;
+    if (dragItem.current.phaseType !== dragOverItem.current.phaseType) {
+      dragItem.current = null;
+      dragOverItem.current = null;
+      return;
+    }
+    const pt = dragItem.current.phaseType;
+    const fromIdx = dragItem.current.index;
+    const toIdx = dragOverItem.current.index;
+    if (fromIdx === toIdx) { dragItem.current = null; dragOverItem.current = null; return; }
+
+    setTraining((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        phases: prev.phases.map((phase) => {
+          if (phase.type !== pt) return phase;
+          const newDrills = [...phase.drills];
+          const [moved] = newDrills.splice(fromIdx, 1);
+          newDrills.splice(toIdx, 0, moved);
+          return { ...phase, drills: newDrills };
+        }),
+      };
+    });
+    dragItem.current = null;
+    dragOverItem.current = null;
+  };
 
   // Attendance stats
   const attStats = useMemo(() => {
@@ -198,8 +237,17 @@ export default function SessionDetailPage() {
                     phase.drills.map((drill, di) => (
                       <div
                         key={drill.id}
-                        className="flex items-center gap-3 bg-bg-surface-2 rounded-lg px-3 py-2"
+                        draggable={isUpcoming}
+                        onDragStart={() => handleDragStart(phaseType, di)}
+                        onDragEnter={() => handleDragEnter(phaseType, di)}
+                        onDragEnd={handleDragEnd}
+                        onDragOver={(e) => e.preventDefault()}
+                        className="flex items-center gap-3 bg-bg-surface-2 rounded-lg px-3 py-2 transition-opacity"
+                        style={{ cursor: isUpcoming ? "grab" : "default" }}
                       >
+                        {isUpcoming && (
+                          <GripVertical className="h-3.5 w-3.5 text-t-muted shrink-0" />
+                        )}
                         <span className="font-ui text-[11px] text-t-muted w-5 text-center shrink-0">
                           {di + 1}
                         </span>
