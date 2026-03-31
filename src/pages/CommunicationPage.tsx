@@ -175,6 +175,16 @@ export default function CommunicationPage() {
           </div>
         </div>
 
+        {/* Step 1b — FUT Composition link */}
+        <FUTCompositionLink
+          matchId={matchId}
+          selections={selections}
+          onImportComposition={handleImportComposition}
+          includeInMessage={includeComp}
+          onIncludeChange={setIncludeComp}
+          wasModified={wasModified}
+        />
+
         {/* Step 2 — Player selection */}
         <div className="space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
