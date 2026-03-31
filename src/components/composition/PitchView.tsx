@@ -144,7 +144,6 @@ export function PitchView({ formation, players, onSwapSlots, onDropBenchPlayer, 
               onDragLeave={readonly ? undefined : handleDragLeave}
               onDrop={readonly ? undefined : (e) => handleDrop(e, i)}
             >
-            >
               {player ? (
                 <div
                   className={`${isOver ? "ring-2 ring-primary rounded-lg" : ""} ${readonly ? "" : "cursor-pointer"}`}
