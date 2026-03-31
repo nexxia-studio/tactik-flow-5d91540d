@@ -63,12 +63,34 @@ const resultStyles: Record<string, { bg: string; text: string; label: string }> 
 
 export default function CalendarPage() {
   const [filter, setFilter] = useState<Filter>("all");
+  const [matches, setMatches] = useState<Match[]>(MOCK_MATCHES);
+
+  const allSorted = useMemo(() => [...matches].sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time)), [matches]);
 
   const filtered = useMemo(() => {
-    if (filter === "played") return MOCK_MATCHES.filter((m) => m.homeScore !== null);
-    if (filter === "upcoming") return MOCK_MATCHES.filter((m) => m.homeScore === null);
-    return MOCK_MATCHES;
-  }, [filter]);
+    if (filter === "played") return allSorted.filter((m) => m.homeScore !== null);
+    if (filter === "upcoming") return allSorted.filter((m) => m.homeScore === null);
+    return allSorted;
+  }, [filter, allSorted]);
+
+  const nextMatch = allSorted.find((m) => m.homeScore === null);
+
+  const handleAddFriendly = (data: { opponent: string; isHome: boolean; date: string; time: string; location: string }) => {
+    const newMatch: Match = {
+      id: `friendly-${Date.now()}`,
+      journee: null,
+      date: data.date,
+      time: data.time,
+      home: data.isHome ? OUR_TEAM : data.opponent,
+      away: data.isHome ? data.opponent : OUR_TEAM,
+      homeScore: null,
+      awayScore: null,
+      location: data.location,
+      isHome: data.isHome,
+      isFriendly: true,
+    };
+    setMatches((prev) => [...prev, newMatch]);
+  };
 
   const nextMatch = MOCK_MATCHES.find((m) => m.homeScore === null);
 
