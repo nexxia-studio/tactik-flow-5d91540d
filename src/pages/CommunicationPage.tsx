@@ -6,10 +6,9 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import {
   MOCK_CONVOCATION_MATCHES, MOCK_CONVOCATION_PLAYERS, MOCK_PAST_CONVOCATIONS,
-  type ConvocationMatch, type ConvocationPlayer,
+  type ConvocationMatch, type ConvocationPlayer, type SelectionStatus,
 } from "@/data/mockCommunication";
-
-type SelectionStatus = "starter" | "sub" | null;
+import FUTCompositionLink, { buildCompositionText } from "@/components/communication/FUTCompositionLink";
 
 function formatMatchDate(iso: string) {
   const d = new Date(iso);
@@ -31,12 +30,26 @@ export default function CommunicationPage() {
   const [selections, setSelections] = useState<Record<string, SelectionStatus>>({});
   const [message, setMessage] = useState("");
   const [copied, setCopied] = useState(false);
+  const [importedCompId, setImportedCompId] = useState<string>("");
+  const [importedSnapshot, setImportedSnapshot] = useState<string>("");
+  const [includeComp, setIncludeComp] = useState(false);
 
   const match = MOCK_CONVOCATION_MATCHES.find((m) => m.id === matchId);
 
   const starters = useMemo(() => MOCK_CONVOCATION_PLAYERS.filter((p) => selections[p.id] === "starter"), [selections]);
   const subs = useMemo(() => MOCK_CONVOCATION_PLAYERS.filter((p) => selections[p.id] === "sub"), [selections]);
   const notSelected = useMemo(() => MOCK_CONVOCATION_PLAYERS.filter((p) => !selections[p.id]), [selections]);
+
+  const wasModified = useMemo(() => {
+    if (!importedCompId || !importedSnapshot) return false;
+    return JSON.stringify(selections) !== importedSnapshot;
+  }, [selections, importedCompId, importedSnapshot]);
+
+  const handleImportComposition = (newSelections: Record<string, SelectionStatus>, compId: string) => {
+    setSelections(newSelections);
+    setImportedCompId(compId);
+    setImportedSnapshot(JSON.stringify(newSelections));
+  };
 
   const togglePlayer = (id: string) => {
     setSelections((prev) => {
@@ -91,9 +104,14 @@ export default function CommunicationPage() {
       lines.push("");
     }
 
+    if (includeComp && importedCompId) {
+      lines.push(buildCompositionText(importedCompId));
+      lines.push("");
+    }
+
     lines.push("⚠️ Confirmer ta présence avant vendredi 18h00");
     return lines.join("\n");
-  }, [match, starters, subs, message, clubName]);
+  }, [match, starters, subs, message, clubName, includeComp, importedCompId]);
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(whatsappText);
@@ -156,6 +174,16 @@ export default function CommunicationPage() {
             )}
           </div>
         </div>
+
+        {/* Step 1b — FUT Composition link */}
+        <FUTCompositionLink
+          matchId={matchId}
+          selections={selections}
+          onImportComposition={handleImportComposition}
+          includeInMessage={includeComp}
+          onIncludeChange={setIncludeComp}
+          wasModified={wasModified}
+        />
 
         {/* Step 2 — Player selection */}
         <div className="space-y-3">
