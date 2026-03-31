@@ -4,9 +4,10 @@ import {
   ArrowLeft, Pencil, ChevronDown, ChevronUp, Trash2,
   Youtube, Clock, Plus, Save, GripVertical,
 } from "lucide-react";
-import { MOCK_TRAININGS, PHASE_META, type Training, type TrainingPhase, type AttendanceStatus, type PhaseType } from "@/data/mockTrainings";
+import { MOCK_TRAININGS, PHASE_META, type Training, type TrainingPhase, type AttendanceStatus, type PhaseType, type Drill } from "@/data/mockTrainings";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import AddDrillDialog from "@/components/trainings/AddDrillDialog";
 
 const PHASE_ORDER: PhaseType[] = ["warmup", "tactical", "technical", "scrimmage"];
 
@@ -91,6 +92,19 @@ export default function SessionDetailPage() {
   };
 
   // Attendance stats
+  const addDrillToPhase = (phaseType: PhaseType, drill: Drill) => {
+    setTraining((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        phases: prev.phases.map((phase) => {
+          if (phase.type !== phaseType) return phase;
+          return { ...phase, drills: [...phase.drills, drill] };
+        }),
+      };
+    });
+  };
+
   const attStats = useMemo(() => {
     if (!training) return { present: 0, late: 0, absent: 0, excused: 0, total: 0, attended: 0, rate: 0 };
     const present = training.attendance.filter((a) => a.status === "present").length;
@@ -269,10 +283,11 @@ export default function SessionDetailPage() {
                   )}
 
                   {isUpcoming && (
-                    <button className="flex items-center gap-1.5 font-ui text-[12px] text-t-muted hover:text-primary transition-colors cursor-pointer py-1">
-                      <Plus className="h-3 w-3" />
-                      Ajouter un exercice
-                    </button>
+                    <AddDrillDialog
+                      phaseType={phaseType}
+                      existingDrillIds={phase.drills.map((d) => d.id)}
+                      onAdd={(drill) => addDrillToPhase(phaseType, drill)}
+                    />
                   )}
 
                   {/* Scrimmage: match instructions */}
