@@ -254,7 +254,12 @@ export default function Composition() {
           {/* Send to communication */}
           <button
             disabled={!selectedMatchId}
-            onClick={() => toast.success("Composition envoyée ✓")}
+            onClick={() => {
+              const match = MOCK_COMPOSITION_MATCHES.find((m) => m.id === selectedMatchId);
+              if (match) {
+                navigate(`/communication?opponent=${encodeURIComponent(match.opponent)}`);
+              }
+            }}
             className="w-full py-3 rounded-xl font-ui text-[var(--text-body)] uppercase tracking-wider bg-primary text-primary-text hover:opacity-90 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             <Send className="w-4 h-4" />
