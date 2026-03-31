@@ -50,6 +50,45 @@ export default function SessionDetailPage() {
     warmup: true, tactical: true, technical: true, scrimmage: true,
   });
   const [notes, setNotes] = useState(initialTraining?.notes || "");
+  const dragItem = useRef<{ phaseType: PhaseType; index: number } | null>(null);
+  const dragOverItem = useRef<{ phaseType: PhaseType; index: number } | null>(null);
+
+  const handleDragStart = (phaseType: PhaseType, index: number) => {
+    dragItem.current = { phaseType, index };
+  };
+
+  const handleDragEnter = (phaseType: PhaseType, index: number) => {
+    dragOverItem.current = { phaseType, index };
+  };
+
+  const handleDragEnd = () => {
+    if (!dragItem.current || !dragOverItem.current) return;
+    if (dragItem.current.phaseType !== dragOverItem.current.phaseType) {
+      dragItem.current = null;
+      dragOverItem.current = null;
+      return;
+    }
+    const pt = dragItem.current.phaseType;
+    const fromIdx = dragItem.current.index;
+    const toIdx = dragOverItem.current.index;
+    if (fromIdx === toIdx) { dragItem.current = null; dragOverItem.current = null; return; }
+
+    setTraining((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        phases: prev.phases.map((phase) => {
+          if (phase.type !== pt) return phase;
+          const newDrills = [...phase.drills];
+          const [moved] = newDrills.splice(fromIdx, 1);
+          newDrills.splice(toIdx, 0, moved);
+          return { ...phase, drills: newDrills };
+        }),
+      };
+    });
+    dragItem.current = null;
+    dragOverItem.current = null;
+  };
 
   // Attendance stats
   const attStats = useMemo(() => {
