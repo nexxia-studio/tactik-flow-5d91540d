@@ -9,6 +9,7 @@ import {
   ContextMenuSeparator,
   ContextMenuLabel,
 } from "@/components/ui/context-menu";
+import { toast } from "sonner";
 
 interface Props {
   allPlayers: FUTPlayer[];
@@ -20,6 +21,7 @@ interface Props {
   onChangeStatus: (playerId: string, status: PlayerStatus) => void;
   maxSubstitutes: number;
   positionLabels: string[];
+  isFriendly?: boolean;
 }
 
 const CATEGORY_ORDER: PositionCategory[] = ["GK", "DEF", "MID", "ATT"];
@@ -43,30 +45,7 @@ const STATUS_OPTIONS: { value: PlayerStatus; label: string }[] = [
   { value: "unavailable", label: "Indisponible" },
 ];
 
-/** Hook for long-press detection (mobile) */
-function useLongPress(callback: () => void, delay = 500) {
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const didLongPress = useRef(false);
-
-  const start = useCallback(() => {
-    didLongPress.current = false;
-    timerRef.current = setTimeout(() => {
-      didLongPress.current = true;
-      callback();
-    }, delay);
-  }, [callback, delay]);
-
-  const cancel = useCallback(() => {
-    if (timerRef.current) clearTimeout(timerRef.current);
-  }, []);
-
-  return {
-    onTouchStart: start,
-    onTouchEnd: cancel,
-    onTouchCancel: cancel,
-    didLongPress,
-  };
-}
+const POSITION_ORDER = ["GK", "RB", "RWB", "CB", "LB", "LWB", "CDM", "CM", "RM", "LM", "CAM", "RAM", "LAM", "RW", "LW", "CF", "SS", "ST"];
 
 function PlayerRow({
   player,
@@ -76,6 +55,7 @@ function PlayerRow({
   isUnavailable,
   onClick,
   onChangeStatus,
+  dragType,
 }: {
   player: FUTPlayer;
   isAssigned: boolean;
@@ -84,26 +64,28 @@ function PlayerRow({
   isUnavailable: boolean;
   onClick: () => void;
   onChangeStatus: (status: PlayerStatus) => void;
+  dragType?: "bench-player" | "unselected-player";
 }) {
   const statusMeta = player.status !== "available" ? STATUS_INFO[player.status] : null;
+  const isDraggable = !!dragType && !isUnavailable;
 
-  const longPress = useLongPress(() => {
-    // On mobile long press, we programmatically trigger context menu via state
-    // But since ContextMenu handles right-click natively, for mobile we'll
-    // use a different approach - the ContextMenu trigger handles touch events
-  });
+  const handleDragStart = (e: React.DragEvent) => {
+    if (!dragType) return;
+    e.dataTransfer.setData("player-id", player.id);
+    e.dataTransfer.setData("drag-type", dragType);
+    // Also set bench-player-id for PitchView compatibility
+    if (dragType === "bench-player" || dragType === "unselected-player") {
+      e.dataTransfer.setData("bench-player-id", player.id);
+    }
+    e.dataTransfer.effectAllowed = "move";
+  };
 
   const rowContent = (
     <button
-      onClick={(e) => {
-        // Don't handle click if it was a long press
-        if (longPress.didLongPress.current) {
-          longPress.didLongPress.current = false;
-          return;
-        }
-        onClick();
-      }}
+      onClick={onClick}
       disabled={isUnavailable}
+      draggable={isDraggable}
+      onDragStart={handleDragStart}
       className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg transition-colors text-left select-none ${
         isUnavailable
           ? "bg-bg-surface-2/50 opacity-50 cursor-not-allowed"
@@ -112,8 +94,7 @@ function PlayerRow({
             : isSubstitute
               ? "bg-accent/10 border border-accent/30 hover:bg-accent/20 cursor-pointer"
               : "bg-bg-surface-2 border border-b-subtle hover:bg-bg-surface-3 cursor-pointer"
-      }`}
-      {...longPress}
+      } ${isDraggable ? "cursor-grab active:cursor-grabbing" : ""}`}
     >
       <span className="font-display text-[13px] text-t-muted w-6 text-center shrink-0">
         #{player.jerseyNumber}
@@ -198,7 +179,9 @@ export function SquadList({
   onChangeStatus,
   maxSubstitutes,
   positionLabels,
+  isFriendly = false,
 }: Props) {
+  const [dragOverSection, setDragOverSection] = useState<string | null>(null);
   const assignedSet = new Set(assignedIds.filter(Boolean));
   const substituteSet = new Set(substituteIds);
 
@@ -215,7 +198,7 @@ export function SquadList({
 
   const titulaires = availablePlayers.filter((p) => assignedSet.has(p.id));
   const substitutes = availablePlayers.filter((p) => substituteSet.has(p.id) && !assignedSet.has(p.id));
-  const POSITION_ORDER = ["GK", "RB", "RWB", "CB", "LB", "LWB", "CDM", "CM", "RM", "LM", "CAM", "RAM", "LAM", "RW", "LW", "CF", "SS", "ST"];
+
   const getPositionRank = (pos: string) => {
     const idx = POSITION_ORDER.indexOf(pos);
     return idx === -1 ? 999 : idx;
@@ -233,49 +216,121 @@ export function SquadList({
     );
   }
 
+  const effectiveMaxSubs = isFriendly ? Infinity : maxSubstitutes;
+
+  const handleSectionDragOver = (e: React.DragEvent, section: string) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    setDragOverSection(section);
+  };
+
+  const handleSectionDragLeave = (e: React.DragEvent) => {
+    // Only clear if leaving the section entirely
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+      setDragOverSection(null);
+    }
+  };
+
+  const handleSectionDrop = (e: React.DragEvent, targetSection: "substitute" | "non-selected") => {
+    e.preventDefault();
+    setDragOverSection(null);
+
+    const playerId = e.dataTransfer.getData("player-id");
+    const dragType = e.dataTransfer.getData("drag-type");
+    if (!playerId || !dragType) return;
+
+    if (targetSection === "non-selected") {
+      // Drop onto non-selected: remove from bench
+      if (dragType === "bench-player") {
+        onToggleSubstitute(playerId); // removes from bench
+      }
+    } else if (targetSection === "substitute") {
+      // Drop onto bench: add to substitutes
+      if (dragType === "unselected-player") {
+        if (substituteIds.length >= effectiveMaxSubs) {
+          toast.error(`Banc complet — maximum ${maxSubstitutes} remplaçants`);
+          return;
+        }
+        onToggleSubstitute(playerId); // adds to bench
+      }
+    }
+  };
+
   const renderSection = (
     title: string,
     players: FUTPlayer[],
     mode: "titulaire" | "substitute" | "non-selected" | "unavailable"
   ) => {
-    if (players.length === 0) return null;
+    if (players.length === 0 && mode !== "substitute" && mode !== "non-selected") return null;
+
+    const isDropZone = mode === "substitute" || mode === "non-selected";
+    const isDraggedOver = dragOverSection === mode;
+
     return (
-      <div>
+      <div
+        onDragOver={isDropZone ? (e) => handleSectionDragOver(e, mode) : undefined}
+        onDragLeave={isDropZone ? handleSectionDragLeave : undefined}
+        onDrop={isDropZone ? (e) => handleSectionDrop(e, mode as "substitute" | "non-selected") : undefined}
+        className={`rounded-lg transition-all duration-150 ${
+          isDraggedOver
+            ? "bg-primary-dim border border-primary-border p-2 -m-2"
+            : ""
+        }`}
+      >
         <h4 className="font-display text-[11px] text-t-muted uppercase tracking-wider mb-1.5 px-1">
           {title}
           {mode === "substitute" && (
-            <span className="ml-1 text-accent">({players.length}/{maxSubstitutes})</span>
+            <span className="ml-1 text-accent">
+              ({players.length}/{isFriendly ? "∞" : maxSubstitutes})
+            </span>
           )}
         </h4>
-        <div className="space-y-1">
-          {players.map((player) => (
-            <PlayerRow
-              key={player.id}
-              player={player}
-              isAssigned={mode === "titulaire"}
-              isSubstitute={mode === "substitute"}
-              slotLabel={mode === "titulaire" ? getSlotLabel(player.id) : undefined}
-              isUnavailable={mode === "unavailable"}
-              onClick={
-                mode === "titulaire"
-                  ? () => onRemovePlayer(player.id)
-                  : mode === "substitute"
-                    ? () => onToggleSubstitute(player.id)
+        {players.length === 0 ? (
+          <p className="font-ui text-[10px] text-t-muted italic px-1 py-2">
+            {mode === "substitute"
+              ? "Glisse un joueur ici pour l'ajouter au banc"
+              : mode === "non-selected"
+                ? "Aucun joueur non sélectionné"
+                : ""}
+          </p>
+        ) : (
+          <div className="space-y-1">
+            {players.map((player) => (
+              <PlayerRow
+                key={player.id}
+                player={player}
+                isAssigned={mode === "titulaire"}
+                isSubstitute={mode === "substitute"}
+                slotLabel={mode === "titulaire" ? getSlotLabel(player.id) : undefined}
+                isUnavailable={mode === "unavailable"}
+                dragType={
+                  mode === "substitute"
+                    ? "bench-player"
                     : mode === "non-selected"
-                      ? () => {
-                          const pitchFull = assignedIds.every((id) => id !== null);
-                          if (!pitchFull) {
-                            onAddPlayer(player.id);
-                          } else {
-                            onToggleSubstitute(player.id);
+                      ? "unselected-player"
+                      : undefined
+                }
+                onClick={
+                  mode === "titulaire"
+                    ? () => onRemovePlayer(player.id)
+                    : mode === "substitute"
+                      ? () => onToggleSubstitute(player.id)
+                      : mode === "non-selected"
+                        ? () => {
+                            const pitchFull = assignedIds.every((id) => id !== null);
+                            if (!pitchFull) {
+                              onAddPlayer(player.id);
+                            } else {
+                              onToggleSubstitute(player.id);
+                            }
                           }
-                        }
-                      : () => {}
-              }
-              onChangeStatus={(status) => onChangeStatus(player.id, status)}
-            />
-          ))}
-        </div>
+                        : () => {}
+                }
+                onChangeStatus={(status) => onChangeStatus(player.id, status)}
+              />
+            ))}
+          </div>
+        )}
       </div>
     );
   };
@@ -284,7 +339,7 @@ export function SquadList({
     <div className="bg-bg-surface-1 border border-b-subtle rounded-xl p-4">
       <h3 className="font-display text-[14px] text-t-primary mb-1">EFFECTIF</h3>
       <p className="font-ui text-[10px] text-t-muted mb-3">
-        Clique pour gérer · Clic droit pour changer le statut
+        Clique pour gérer · Clic droit pour changer le statut · Glisser-déposer pour réorganiser
       </p>
 
       <div className="space-y-4 max-h-[600px] overflow-y-auto pr-1">
