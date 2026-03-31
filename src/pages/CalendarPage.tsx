@@ -142,7 +142,7 @@ export default function CalendarPage() {
       )}
 
       {/* Filters */}
-      <div className="flex gap-1.5">
+      <div className="flex gap-1.5 items-center">
         {([
           { key: "all" as Filter, label: "Tous" },
           { key: "played" as Filter, label: "Joués" },
@@ -160,6 +160,9 @@ export default function CalendarPage() {
             {f.label}
           </button>
         ))}
+        <div className="ml-auto">
+          <AddFriendlyMatchDialog onAdd={handleAddFriendly} />
+        </div>
       </div>
 
       {/* Match list */}
