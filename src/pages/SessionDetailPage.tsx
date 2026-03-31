@@ -1,8 +1,8 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Pencil, ChevronDown, ChevronUp, Trash2,
-  Youtube, Clock, Plus, Save,
+  Youtube, Clock, Plus, Save, GripVertical,
 } from "lucide-react";
 import { MOCK_TRAININGS, PHASE_META, type Training, type TrainingPhase, type AttendanceStatus, type PhaseType } from "@/data/mockTrainings";
 import { Textarea } from "@/components/ui/textarea";
