@@ -237,8 +237,17 @@ export default function SessionDetailPage() {
                     phase.drills.map((drill, di) => (
                       <div
                         key={drill.id}
-                        className="flex items-center gap-3 bg-bg-surface-2 rounded-lg px-3 py-2"
+                        draggable={isUpcoming}
+                        onDragStart={() => handleDragStart(phaseType, di)}
+                        onDragEnter={() => handleDragEnter(phaseType, di)}
+                        onDragEnd={handleDragEnd}
+                        onDragOver={(e) => e.preventDefault()}
+                        className="flex items-center gap-3 bg-bg-surface-2 rounded-lg px-3 py-2 transition-opacity"
+                        style={{ cursor: isUpcoming ? "grab" : "default" }}
                       >
+                        {isUpcoming && (
+                          <GripVertical className="h-3.5 w-3.5 text-t-muted shrink-0" />
+                        )}
                         <span className="font-ui text-[11px] text-t-muted w-5 text-center shrink-0">
                           {di + 1}
                         </span>
