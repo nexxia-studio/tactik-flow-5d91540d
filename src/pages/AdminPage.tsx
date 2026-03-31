@@ -22,7 +22,7 @@ const CLUB = {
 };
 
 const SUBSCRIPTION = {
-  plan: "solo" as const,
+  plan: "solo" as "solo" | "solo+" | "club",
   plan_label: "SOLO",
   amount: 9,
   period: "mois" as const,
