@@ -8,7 +8,7 @@ import {
   MOCK_CONVOCATION_MATCHES, MOCK_CONVOCATION_PLAYERS, MOCK_PAST_CONVOCATIONS,
   type ConvocationMatch, type ConvocationPlayer, type SelectionStatus,
 } from "@/data/mockCommunication";
-import FUTCompositionLink, { buildCompositionText } from "@/components/communication/FUTCompositionLink";
+import FUTCompositionLink from "@/components/communication/FUTCompositionLink";
 
 function formatMatchDate(iso: string) {
   const d = new Date(iso);
