@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { FORMATIONS, FORMATION_KEYS } from "@/components/composition/formations";
 import { MOCK_PLAYERS, type FUTPlayer, type PlayerStatus, getPositionCategory } from "@/components/composition/mockPlayers";
 import { PitchView, computeChemScore } from "@/components/composition/PitchView";
