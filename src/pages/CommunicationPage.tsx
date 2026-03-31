@@ -6,10 +6,9 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import {
   MOCK_CONVOCATION_MATCHES, MOCK_CONVOCATION_PLAYERS, MOCK_PAST_CONVOCATIONS,
-  type ConvocationMatch, type ConvocationPlayer,
+  type ConvocationMatch, type ConvocationPlayer, type SelectionStatus,
 } from "@/data/mockCommunication";
-
-type SelectionStatus = "starter" | "sub" | null;
+import FUTCompositionLink, { buildCompositionText } from "@/components/communication/FUTCompositionLink";
 
 function formatMatchDate(iso: string) {
   const d = new Date(iso);
