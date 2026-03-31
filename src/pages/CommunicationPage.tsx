@@ -27,13 +27,22 @@ function formatDate(iso: string) {
 }
 
 export default function CommunicationPage() {
+  const [searchParams] = useSearchParams();
   const [matchId, setMatchId] = useState<string>("");
   const [selections, setSelections] = useState<Record<string, SelectionStatus>>({});
   const [message, setMessage] = useState("");
   const [copied, setCopied] = useState(false);
   const [importedCompId, setImportedCompId] = useState<string>("");
   const [importedSnapshot, setImportedSnapshot] = useState<string>("");
-  
+
+  // Auto-select match from query params (from Composition page)
+  useEffect(() => {
+    const opponent = searchParams.get("opponent");
+    if (opponent && !matchId) {
+      const found = MOCK_CONVOCATION_MATCHES.find((m) => m.opponent === opponent);
+      if (found) setMatchId(found.id);
+    }
+  }, [searchParams, matchId]);
 
   const match = MOCK_CONVOCATION_MATCHES.find((m) => m.id === matchId);
 
