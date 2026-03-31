@@ -238,7 +238,7 @@ export default function CommunicationPage() {
             <div className="bg-[#0B3D2E] border border-[#1A5C40] rounded-xl p-4 font-ui text-[13px] text-[#E0F0E6] whitespace-pre-wrap leading-relaxed">
               {whatsappText}
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <Button
                 onClick={handleCopy}
                 className="bg-primary text-primary-text font-ui hover:opacity-90 flex items-center gap-2"
