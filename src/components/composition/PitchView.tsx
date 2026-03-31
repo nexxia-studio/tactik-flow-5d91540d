@@ -171,13 +171,6 @@ export function PitchView({ formation, players, onSwapSlots, onDropBenchPlayer, 
         })}
       </div>
 
-      {/* Chemistry score badge */}
-      <div className="absolute top-3 right-3 z-10 bg-bg-surface-1/90 backdrop-blur-sm border border-b-subtle rounded-lg px-3 py-2 flex items-center gap-2">
-        <span className="font-ui text-[10px] text-t-muted uppercase tracking-wider">Chimie</span>
-        <span className={`font-display text-[18px] ${chemScore >= 75 ? "text-[var(--color-success)]" : chemScore >= 50 ? "text-[var(--color-warning)]" : "text-[var(--color-danger)]"}`}>
-          {chemScore}
-        </span>
-      </div>
     </div>
   );
 }
