@@ -40,6 +40,17 @@ export default function CommunicationPage() {
   const subs = useMemo(() => MOCK_CONVOCATION_PLAYERS.filter((p) => selections[p.id] === "sub"), [selections]);
   const notSelected = useMemo(() => MOCK_CONVOCATION_PLAYERS.filter((p) => !selections[p.id]), [selections]);
 
+  const wasModified = useMemo(() => {
+    if (!importedCompId || !importedSnapshot) return false;
+    return JSON.stringify(selections) !== importedSnapshot;
+  }, [selections, importedCompId, importedSnapshot]);
+
+  const handleImportComposition = (newSelections: Record<string, SelectionStatus>, compId: string) => {
+    setSelections(newSelections);
+    setImportedCompId(compId);
+    setImportedSnapshot(JSON.stringify(newSelections));
+  };
+
   const togglePlayer = (id: string) => {
     setSelections((prev) => {
       const current = prev[id];
