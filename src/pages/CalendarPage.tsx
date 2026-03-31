@@ -242,7 +242,7 @@ export default function CalendarPage() {
                 {/* Delete friendly match */}
                 {match.isFriendly && (
                   <button
-                    onClick={() => handleDeleteFriendly(match.id)}
+                    onClick={() => setDeletingMatchId(match.id)}
                     className="w-8 h-8 rounded-lg flex items-center justify-center bg-bg-surface-2 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer hover:bg-[rgba(255,59,48,0.15)] border border-transparent hover:border-[rgba(255,59,48,0.3)]"
                     title="Supprimer le match amical"
                   >
