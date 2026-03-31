@@ -2,7 +2,8 @@ import { useState, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Plus, Search, Youtube, Clock } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Plus, Search, Youtube, Clock, BookOpen, PenLine } from "lucide-react";
 import type { Drill, DrillSource, PhaseType } from "@/data/mockTrainings";
 import { PHASE_META } from "@/data/mockTrainings";
 
