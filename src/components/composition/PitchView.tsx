@@ -24,7 +24,7 @@ function getChemistry(a: FUTPlayer, b: FUTPlayer, posA: string, posB: string): C
   return "bad";
 }
 
-export function PitchView({ formation, players, onSwapSlots, onDropBenchPlayer, onRemovePlayer }: Props) {
+export function PitchView({ formation, players, onSwapSlots, onDropBenchPlayer, onRemovePlayer, readonly = false }: Props) {
   const [dragOverSlot, setDragOverSlot] = useState<number | null>(null);
 
   const chemScore = useMemo(() => {
