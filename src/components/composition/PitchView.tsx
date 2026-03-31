@@ -78,8 +78,11 @@ export function PitchView({ formation, players, onSwapSlots, onDropBenchPlayer, 
 
   const handleDragStart = useCallback((e: React.DragEvent, slotIndex: number) => {
     e.dataTransfer.setData("pitch-slot", String(slotIndex));
+    e.dataTransfer.setData("drag-type", "pitch-player");
+    const playerId = players[slotIndex]?.id;
+    if (playerId) e.dataTransfer.setData("player-id", playerId);
     e.dataTransfer.effectAllowed = "move";
-  }, []);
+  }, [players]);
 
   return (
     <div className="relative w-full" style={{ paddingBottom: "140%" }}>

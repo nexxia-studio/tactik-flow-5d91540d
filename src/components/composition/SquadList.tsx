@@ -240,18 +240,21 @@ export function SquadList({
     if (!playerId || !dragType) return;
 
     if (targetSection === "non-selected") {
-      // Drop onto non-selected: remove from bench
       if (dragType === "bench-player") {
         onToggleSubstitute(playerId); // removes from bench
+      } else if (dragType === "pitch-player") {
+        onRemovePlayer(playerId); // removes from pitch → non-selected
       }
     } else if (targetSection === "substitute") {
-      // Drop onto bench: add to substitutes
-      if (dragType === "unselected-player") {
+      if (dragType === "unselected-player" || dragType === "pitch-player") {
         if (substituteIds.length >= effectiveMaxSubs) {
           toast.error(`Banc complet — maximum ${maxSubstitutes} remplaçants`);
           return;
         }
-        onToggleSubstitute(playerId); // adds to bench
+        if (dragType === "pitch-player") {
+          onRemovePlayer(playerId); // remove from pitch first
+        }
+        onToggleSubstitute(playerId); // add to bench
       }
     }
   };
