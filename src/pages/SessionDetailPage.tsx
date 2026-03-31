@@ -75,6 +75,17 @@ export default function SessionDetailPage() {
     );
   }
 
+  const isUpcoming = training.status === "planned";
+  const isCompleted = training.status === "completed";
+
+  const togglePhase = (type: PhaseType) => {
+    setExpandedPhases((prev) => ({ ...prev, [type]: !prev[type] }));
+  };
+
+  const totalDuration = training.phases.reduce((sum, p) => sum + p.duration, 0);
+  const totalHours = Math.floor(totalDuration / 60);
+  const totalMins = totalDuration % 60;
+
   const updateAttendance = (playerId: string, status: AttendanceStatus) => {
     setTraining((prev) => {
       if (!prev) return prev;
