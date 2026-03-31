@@ -2,6 +2,16 @@ import { useState, useMemo } from "react";
 import { Calendar, MapPin, Clock, Pencil, Trash2 } from "lucide-react";
 import AddFriendlyMatchDialog from "@/components/calendar/AddFriendlyMatchDialog";
 import EditScoreDialog from "@/components/calendar/EditScoreDialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Match {
   id: string;
@@ -65,6 +75,7 @@ export default function CalendarPage() {
   const [filter, setFilter] = useState<Filter>("all");
   const [matches, setMatches] = useState<Match[]>(MOCK_MATCHES);
   const [editingMatch, setEditingMatch] = useState<Match | null>(null);
+  const [deletingMatchId, setDeletingMatchId] = useState<string | null>(null);
 
   const allSorted = useMemo(() => [...matches].sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time)), [matches]);
 
@@ -93,8 +104,10 @@ export default function CalendarPage() {
     setMatches((prev) => [...prev, newMatch]);
   };
 
-  const handleDeleteFriendly = (id: string) => {
-    setMatches((prev) => prev.filter((m) => m.id !== id));
+  const handleConfirmDelete = () => {
+    if (!deletingMatchId) return;
+    setMatches((prev) => prev.filter((m) => m.id !== deletingMatchId));
+    setDeletingMatchId(null);
   };
 
   const handleSaveScore = (homeScore: number, awayScore: number) => {
@@ -239,7 +252,7 @@ export default function CalendarPage() {
                 {/* Delete friendly match */}
                 {match.isFriendly && (
                   <button
-                    onClick={() => handleDeleteFriendly(match.id)}
+                    onClick={() => setDeletingMatchId(match.id)}
                     className="w-8 h-8 rounded-lg flex items-center justify-center bg-bg-surface-2 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer hover:bg-[rgba(255,59,48,0.15)] border border-transparent hover:border-[rgba(255,59,48,0.3)]"
                     title="Supprimer le match amical"
                   >
@@ -276,6 +289,29 @@ export default function CalendarPage() {
           onSave={handleSaveScore}
         />
       )}
+
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={!!deletingMatchId} onOpenChange={(v) => { if (!v) setDeletingMatchId(null); }}>
+        <AlertDialogContent className="bg-bg-base border-b-subtle">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display text-t-primary text-[14px]">SUPPRIMER LE MATCH</AlertDialogTitle>
+            <AlertDialogDescription className="text-t-secondary font-ui text-[var(--text-small)]">
+              Êtes-vous sûr de vouloir supprimer ce match amical ? Cette action est irréversible.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="font-ui bg-bg-surface-1 text-t-secondary border-b-subtle hover:bg-bg-surface-2">
+              Annuler
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              className="bg-[var(--color-danger)] text-white font-ui hover:opacity-90"
+            >
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
