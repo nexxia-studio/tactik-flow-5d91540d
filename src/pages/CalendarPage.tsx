@@ -2,18 +2,18 @@ import { useState, useMemo } from "react";
 import { Calendar, MapPin, Clock } from "lucide-react";
 import AddFriendlyMatchDialog from "@/components/calendar/AddFriendlyMatchDialog";
 
-/* ── Mock match data ── */
 interface Match {
   id: string;
-  journee: number;
-  date: string;         // ISO date
+  journee: number | null;   // null for friendly matches
+  date: string;
   time: string;
   home: string;
   away: string;
   homeScore: number | null;
   awayScore: number | null;
   location: string;
-  isHome: boolean;       // is our team home?
+  isHome: boolean;
+  isFriendly?: boolean;
 }
 
 const OUR_TEAM = "Xhoffraix";
