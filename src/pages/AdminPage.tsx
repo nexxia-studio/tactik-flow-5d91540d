@@ -2,13 +2,16 @@ import { useState } from "react";
 import {
   Users, Calendar, Trophy, ChevronDown, Download, X, Send,
   Settings, CreditCard, FileText, AlertTriangle, RotateCcw, Trash2,
+  ExternalLink, Check,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { DangerConfirmDialog } from "@/components/admin/DangerConfirmDialog";
+import { PLANS, formatPrice } from "@/config/stripe-plans";
 
 /* ── Mock data ── */
 const CLUB = {
@@ -24,6 +27,7 @@ const CLUB = {
 const SUBSCRIPTION = {
   plan: "solo" as "solo" | "solo+" | "club",
   plan_label: "SOLO",
+  plan_id: "solo",
   amount: 9,
   period: "mois" as const,
   renewal_date: "1 mai 2025",
@@ -54,12 +58,31 @@ const ROLE_LABELS: Record<string, { label: string; color: string }> = {
   fine_manager: { label: "Gestionnaire amendes", color: "bg-[var(--color-warning)]/15 text-[var(--color-warning)]" },
 };
 
+/* ── Button style for primary buttons (black text, semibold) ── */
+const primaryBtnClass = "py-2.5 rounded-xl font-ui text-[12px] uppercase tracking-[0.05em] font-semibold bg-primary text-black hover:opacity-90 transition-all flex items-center justify-center gap-2";
+
 export default function AdminPage() {
   const [dangerAction, setDangerAction] = useState<"reset" | "delete" | null>(null);
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState("coach");
 
+  // Modals
+  const [editClubOpen, setEditClubOpen] = useState(false);
+  const [manageSubOpen, setManageSubOpen] = useState(false);
+  const [changePlanOpen, setChangePlanOpen] = useState(false);
+
+  // Edit club form
+  const [clubName, setClubName] = useState(CLUB.name);
+  const [clubCity, setClubCity] = useState(CLUB.city);
+  const [clubDivision, setClubDivision] = useState(CLUB.division);
+
+  // Change plan
+  const [billingPeriod, setBillingPeriod] = useState<"monthly" | "yearly">("monthly");
+
   const planStyle = PLAN_STYLES[SUBSCRIPTION.plan] ?? PLAN_STYLES.solo;
+
+  // Only show the 4 plans requested
+  const displayPlans = PLANS.filter((p) => ["solo", "solo-plus", "club-2", "club-3"].includes(p.id));
 
   return (
     <div className="space-y-8 pb-20">
@@ -115,7 +138,10 @@ export default function AdminPage() {
           </div>
         </div>
 
-        <button className="w-full py-2.5 rounded-xl font-ui text-[var(--text-label)] uppercase tracking-wider bg-transparent border border-b-default text-t-secondary hover:bg-bg-surface-2 transition-all">
+        <button
+          onClick={() => setEditClubOpen(true)}
+          className="w-full py-2.5 rounded-xl font-ui text-[var(--text-label)] uppercase tracking-wider bg-transparent border border-b-default text-t-secondary hover:bg-bg-surface-2 transition-all"
+        >
           Modifier les infos du club
         </button>
       </section>
@@ -159,11 +185,17 @@ export default function AdminPage() {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3">
-          <button className="flex-1 py-2.5 rounded-xl font-ui text-[var(--text-label)] uppercase tracking-wider bg-primary text-primary-text hover:opacity-90 transition-all flex items-center justify-center gap-2">
-            <CreditCard className="w-4 h-4" />
+          <button
+            onClick={() => setManageSubOpen(true)}
+            className={`${primaryBtnClass} flex-1 px-5`}
+          >
+            <CreditCard className="w-4 h-4 stroke-black" />
             Gérer mon abonnement
           </button>
-          <button className="flex-1 py-2.5 rounded-xl font-ui text-[var(--text-label)] uppercase tracking-wider bg-transparent border border-b-default text-t-secondary hover:bg-bg-surface-2 transition-all">
+          <button
+            onClick={() => setChangePlanOpen(true)}
+            className="flex-1 py-2.5 rounded-xl font-ui text-[var(--text-label)] uppercase tracking-wider bg-transparent border border-b-default text-t-secondary hover:bg-bg-surface-2 transition-all"
+          >
             Changer de plan
           </button>
         </div>
@@ -274,9 +306,9 @@ export default function AdminPage() {
                 toast.success(`Invitation envoyée à ${inviteEmail}`);
                 setInviteEmail("");
               }}
-              className="py-2.5 px-5 rounded-xl font-ui text-[var(--text-label)] uppercase tracking-wider bg-primary text-primary-text hover:opacity-90 transition-all flex items-center justify-center gap-2 shrink-0"
+              className={`${primaryBtnClass} px-5 shrink-0`}
             >
-              <Send className="w-4 h-4" />
+              <Send className="w-4 h-4 stroke-black" />
               Envoyer l'invitation
             </button>
           </div>
@@ -290,7 +322,6 @@ export default function AdminPage() {
         </h2>
 
         <div className="space-y-4">
-          {/* Reset season */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-bg-surface-2 border border-b-subtle rounded-xl p-4">
             <div className="flex-1">
               <p className="font-ui text-[var(--text-body)] text-t-primary flex items-center gap-2">
@@ -309,7 +340,6 @@ export default function AdminPage() {
             </button>
           </div>
 
-          {/* Delete club */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-bg-surface-2 border border-b-subtle rounded-xl p-4">
             <div className="flex-1">
               <p className="font-ui text-[var(--text-body)] text-t-primary flex items-center gap-2">
@@ -329,6 +359,161 @@ export default function AdminPage() {
           </div>
         </div>
       </section>
+
+      {/* ── Modals ── */}
+
+      {/* Edit Club Modal */}
+      <Dialog open={editClubOpen} onOpenChange={setEditClubOpen}>
+        <DialogContent className="bg-bg-surface-1 border-b-subtle sm:max-w-[440px]">
+          <DialogHeader>
+            <DialogTitle className="font-display text-t-primary text-[var(--text-h3)] uppercase">
+              Modifier les infos du club
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-1.5">
+              <label className="font-ui text-[var(--text-label)] text-t-muted uppercase tracking-wider">Nom du club</label>
+              <Input value={clubName} onChange={(e) => setClubName(e.target.value)} className="bg-bg-surface-2 border-b-subtle font-ui text-[var(--text-body)]" />
+            </div>
+            <div className="space-y-1.5">
+              <label className="font-ui text-[var(--text-label)] text-t-muted uppercase tracking-wider">Ville</label>
+              <Input value={clubCity} onChange={(e) => setClubCity(e.target.value)} className="bg-bg-surface-2 border-b-subtle font-ui text-[var(--text-body)]" />
+            </div>
+            <div className="space-y-1.5">
+              <label className="font-ui text-[var(--text-label)] text-t-muted uppercase tracking-wider">Division</label>
+              <Input value={clubDivision} onChange={(e) => setClubDivision(e.target.value)} className="bg-bg-surface-2 border-b-subtle font-ui text-[var(--text-body)]" />
+            </div>
+          </div>
+          <DialogFooter className="flex gap-3 sm:gap-3">
+            <button onClick={() => setEditClubOpen(false)} className="flex-1 py-2.5 rounded-xl font-ui text-[var(--text-label)] uppercase tracking-wider bg-transparent border border-b-default text-t-secondary hover:bg-bg-surface-2 transition-all">
+              Annuler
+            </button>
+            <button
+              onClick={() => {
+                toast.success("Infos du club mises à jour ✓");
+                setEditClubOpen(false);
+              }}
+              className={`${primaryBtnClass} flex-1 px-5`}
+            >
+              Sauvegarder
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Manage Subscription Modal */}
+      <Dialog open={manageSubOpen} onOpenChange={setManageSubOpen}>
+        <DialogContent className="bg-bg-surface-1 border-b-subtle sm:max-w-[440px]">
+          <DialogHeader>
+            <DialogTitle className="font-display text-t-primary text-[var(--text-h3)] uppercase">
+              Gestion de l'abonnement
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="font-ui text-[var(--text-body)] text-t-secondary">
+              Vous allez être redirigé vers le portail Stripe pour gérer votre abonnement.
+            </p>
+          </div>
+          <DialogFooter className="flex gap-3 sm:gap-3">
+            <button onClick={() => setManageSubOpen(false)} className="flex-1 py-2.5 rounded-xl font-ui text-[var(--text-label)] uppercase tracking-wider bg-transparent border border-b-default text-t-secondary hover:bg-bg-surface-2 transition-all">
+              Annuler
+            </button>
+            <button
+              onClick={() => {
+                toast.info("Redirection vers le portail Stripe…");
+                setManageSubOpen(false);
+              }}
+              className={`${primaryBtnClass} flex-1 px-5`}
+            >
+              <ExternalLink className="w-4 h-4 stroke-black" />
+              Accéder au portail Stripe
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Change Plan Modal */}
+      <Dialog open={changePlanOpen} onOpenChange={setChangePlanOpen}>
+        <DialogContent className="bg-bg-surface-1 border-b-subtle sm:max-w-[640px]">
+          <DialogHeader>
+            <DialogTitle className="font-display text-t-primary text-[var(--text-h3)] uppercase">
+              Changer de plan
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4 space-y-5">
+            {/* Billing toggle */}
+            <div className="flex items-center justify-center gap-2">
+              <button
+                onClick={() => setBillingPeriod("monthly")}
+                className={`px-4 py-1.5 rounded-lg font-ui text-[12px] uppercase tracking-wider transition-all ${
+                  billingPeriod === "monthly"
+                    ? "bg-primary text-black font-semibold"
+                    : "bg-bg-surface-2 text-t-secondary border border-b-subtle hover:bg-bg-surface-3"
+                }`}
+              >
+                Mensuel
+              </button>
+              <button
+                onClick={() => setBillingPeriod("yearly")}
+                className={`px-4 py-1.5 rounded-lg font-ui text-[12px] uppercase tracking-wider transition-all ${
+                  billingPeriod === "yearly"
+                    ? "bg-primary text-black font-semibold"
+                    : "bg-bg-surface-2 text-t-secondary border border-b-subtle hover:bg-bg-surface-3"
+                }`}
+              >
+                Annuel
+              </button>
+            </div>
+
+            {/* Plan cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {displayPlans.map((plan) => {
+                const isCurrent = plan.id === SUBSCRIPTION.plan_id;
+                const price = billingPeriod === "monthly" ? plan.price_monthly : plan.price_yearly;
+                return (
+                  <div
+                    key={plan.id}
+                    className={`relative bg-bg-surface-2 border rounded-xl p-4 flex flex-col items-center gap-3 text-center transition-all ${
+                      isCurrent ? "border-primary ring-1 ring-primary/30" : "border-b-subtle"
+                    }`}
+                  >
+                    {isCurrent && (
+                      <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-md font-ui text-[9px] uppercase tracking-wider bg-primary text-black font-semibold whitespace-nowrap">
+                        Plan actuel
+                      </span>
+                    )}
+                    <p className="font-display text-[16px] text-t-primary uppercase mt-1">{plan.name}</p>
+                    <p className="font-ui text-[var(--text-micro)] text-t-muted">{plan.description}</p>
+                    <div>
+                      <span className="font-display text-[24px] text-primary leading-none">
+                        {formatPrice(price.amount)}
+                      </span>
+                      <span className="font-ui text-[var(--text-micro)] text-t-muted ml-1">
+                        /{billingPeriod === "monthly" ? "mois" : "an"}
+                      </span>
+                    </div>
+                    {isCurrent ? (
+                      <span className="flex items-center gap-1 font-ui text-[11px] text-primary">
+                        <Check className="w-3.5 h-3.5" /> Actif
+                      </span>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          toast.success(`Plan changé vers ${plan.name} ✓`);
+                          setChangePlanOpen(false);
+                        }}
+                        className={`${primaryBtnClass} w-full px-3 text-[11px]`}
+                      >
+                        Choisir
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Danger confirmation dialog */}
       <DangerConfirmDialog
