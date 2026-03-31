@@ -147,8 +147,8 @@ export function PitchView({ formation, players, onSwapSlots, onDropBenchPlayer, 
             >
               {player ? (
                 <div
-                  className={`${isOver ? "ring-2 ring-primary rounded-lg" : ""} cursor-pointer`}
-                  onClick={() => onRemovePlayer?.(player.id)}
+                  className={`${isOver ? "ring-2 ring-primary rounded-lg" : ""} ${readonly ? "" : "cursor-pointer"}`}
+                  onClick={readonly ? undefined : () => onRemovePlayer?.(player.id)}
                 >
                   <FUTPlayerCard player={player} positionLabel={pos.label} compact />
                 </div>
