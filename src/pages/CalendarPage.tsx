@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
-import { Calendar, ChevronRight, MapPin, Clock } from "lucide-react";
+import { Calendar, MapPin, Clock } from "lucide-react";
+import AddFriendlyMatchDialog from "@/components/calendar/AddFriendlyMatchDialog";
 
 /* ── Mock match data ── */
 interface Match {
