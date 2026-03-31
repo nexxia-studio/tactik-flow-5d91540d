@@ -104,9 +104,14 @@ export default function CommunicationPage() {
       lines.push("");
     }
 
+    if (includeComp && importedCompId) {
+      lines.push(buildCompositionText(importedCompId));
+      lines.push("");
+    }
+
     lines.push("⚠️ Confirmer ta présence avant vendredi 18h00");
     return lines.join("\n");
-  }, [match, starters, subs, message, clubName]);
+  }, [match, starters, subs, message, clubName, includeComp, importedCompId]);
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(whatsappText);
